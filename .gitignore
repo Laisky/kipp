@@ -1,7 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*$py.class
 
 # C extensions
 *.so
@@ -11,16 +10,13 @@ __pycache__/
 env/
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
-.eggs/
 lib/
 lib64/
 parts/
 sdist/
 var/
-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -39,12 +35,9 @@ pip-delete-this-directory.txt
 htmlcov/
 .tox/
 .coverage
-.coverage.*
 .cache
 nosetests.xml
 coverage.xml
-*.cover
-.hypothesis/
 
 # Translations
 *.mo
@@ -52,14 +45,6 @@ coverage.xml
 
 # Django stuff:
 *.log
-local_settings.py
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
 
 # Sphinx documentation
 docs/_build/
@@ -67,35 +52,54 @@ docs/_build/
 # PyBuilder
 target/
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# ipython
+.ipynb_checkpoints/
+
+# koala
+koala-config.json
 
 # pyenv
-.python-version
+/venv
+/active
 
-# celery beat schedule file
-celerybeat-schedule
+# test
+/data
+/notebook
+.tox
 
-# SageMath parsed files
-*.sage.py
+# ctags
+/.tags*
 
-# dotenv
-.env
+# webassets
+.webassets-cache/
+assets/
+.assets
+html
+
+# node
+node_modules/
+bower_components
+
+# sass
+.sass-cache/
+
+# docs
+/site
+/docs/source
+/docs/build
 
 # virtualenv
-.venv
-venv/
-ENV/
+venv
+activate
 
-# Spyder project settings
-.spyderproject
-.spyproject
+# eclipse workspace config
+.idea/
+.project
+.pydevproject
 
-# Rope project settings
-.ropeproject
+# settings
+/options/settings/settings_local.py
 
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
+# project
+.vscode
+tags
