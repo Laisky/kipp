@@ -37,7 +37,7 @@ FROM_ADDRESS = 'mls-normalizer-ng@movoto.com'
 
 
 class EmailSender(object):
-    def __init__(self, host=HOST, port=None, logger=None):
+    def __init__(self, host=HOST, port=None, username=None, passwd=None, logger=None):
         """Initiallize EmailSender
 
         Args:
@@ -47,6 +47,8 @@ class EmailSender(object):
         """
         self._host = host
         self._port = port
+        self._user = username
+        self._passwd = passwd
         self._logger = logger
 
     def set_smtp_host(self, host):
@@ -109,6 +111,7 @@ class EmailSender(object):
             bool: is successed
         """
         msg = MIMEMultipart('alternative')
+        msg.set_charset("utf-8")
         if content:
             msg.attach(MIMEText(self.parse_content(content), 'html'))
 
@@ -121,6 +124,10 @@ class EmailSender(object):
 
         try:
             s = smtplib.SMTP(self._host, self._port)
+            s.starttls()
+            if self._user and self._passwd:
+                s.login(self._user, self._passwd)
+
             s.sendmail(mail_from, mail_to.split(','), msg.as_string())
             s.quit()
             self.get_logger().info("send email successfully to {} with subject {}".format(mail_to, subject))
