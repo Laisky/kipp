@@ -9,7 +9,7 @@ import tempfile
 import re
 import fcntl
 
-from .logger import setup_logger, set_logger, get_logger
+from .logger import setup_logger, get_logger
 from .date import UTC, CST, parse_dtstr, utcnow, cstnow
 from .concurrents import Future, ThreadPoolExecutor, ProcessPoolExecutor
 from .mailsender import EmailSender

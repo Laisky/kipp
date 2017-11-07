@@ -64,14 +64,14 @@ class EmailSender(object):
     def get_logger(self):
         return self._logger or get_kipp_logger().getChild('email')
 
-    def setup_by_utilities(self):
-        try:
-            from Utilities.movoto import settings
-        except ImportError:
-            return
+    # def setup_by_utilities(self):
+    #     try:
+    #         from Utilities.movoto import settings
+    #     except ImportError:
+    #         return
 
-        self._host = settings.HOST
-        self._mail_from = settings.FROM_ADDRESS
+    #     self._host = settings.HOST
+    #     self._mail_from = settings.FROM_ADDRESS
 
     def parse_content(self, content):
         return '<font face="Microsoft YaHei, Helvetica Neue, Helvetica">{}</font>'.format(

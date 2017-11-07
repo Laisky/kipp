@@ -81,12 +81,12 @@ setup(
     install_requires=requires,
     extras_require=extras,
     data_files=data_files,
-    author='movoto',
-    author_email='data@movoto.com',
-    description='Motovo New Utilities',
+    author='Laisky',
+    author_email='ppcelery@gmail.com',
+    description='Python Utils',
     long_description=long_description,
-    url='http://www.movoto.com',
-    license='LGPLv3 License',
+    url='https://github.com/Laisky/ramjet',
+    license='MIT License',
     entry_points="""\
         [console_scripts]
         kipp_runner=kipp.runner.__main__:main

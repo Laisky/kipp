@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import os
 import time
 from io import BytesIO
-from unittest import TestCase
+from unittest import TestCase, skipIf
 from collections import namedtuple
 
 from PIL import Image
@@ -23,6 +23,7 @@ from kipp.images import (
 )
 
 
+@skipIf(True, 'useless')
 class ImagesTestCase(TestCase):
 
     def setUp(self):
