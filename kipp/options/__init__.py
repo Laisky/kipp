@@ -19,110 +19,107 @@ from imp import load_source
 
 from kipp.libs import singleton
 from kipp.utils import get_logger
-from .mlogger import LazyMLogger, ConvertFailureLog
+# from .mlogger import LazyMLogger, ConvertFailureLog
 from .arguments import ArgparseMixin
 from .exceptions import KippOptionsException
 
 
-class UtilitiesMixin:
-    """Load Utilities from PYTHONPATH
-    """
+# class UtilitiesMixin:
+#     """Load Utilities from PYTHONPATH
+#     """
 
-    def load_utilities_settings(self):
-        for p in sys.path:
-            py_path = os.path.abspath(p)
-            if not os.path.isdir(py_path):
-                continue
+#     def load_utilities_settings(self):
+#         for p in sys.path:
+#             py_path = os.path.abspath(p)
+#             if not os.path.isdir(py_path):
+#                 continue
 
-            for package in next(os.walk(py_path))[1]:
-                if package != 'Utilities':
-                    continue
+#             for package in next(os.walk(py_path))[1]:
+#                 if package != 'Utilities':
+#                     continue
 
-                if not os.path.isdir(os.path.join(p, package)):
-                    continue
+#                 if not os.path.isdir(os.path.join(p, package)):
+#                     continue
 
-                st_fpath = os.path.join(p, package, 'movoto', 'settings.py')
-                get_logger().info('load utilities from: %s', st_fpath)
-                return load_source('utils_settings', st_fpath)
+#                 st_fpath = os.path.join(p, package, 'movoto', 'settings.py')
+#                 get_logger().info('load utilities from: %s', st_fpath)
+#                 return load_source('utils_settings', st_fpath)
 
-        raise KippOptionsException('Can not found ``Utilities`` in PYTHONPATH')
+#         raise KippOptionsException('Can not found ``Utilities`` in PYTHONPATH')
 
-    def patch_utilities(self):
-        """Patch Utilities settings"""
-        if getattr(self, '_is_patched_utilities', None):  # do not patch twice
-            return
+#     def patch_utilities(self):
+#         """Patch Utilities settings"""
+#         if getattr(self, '_is_patched_utilities', None):  # do not patch twice
+#             return
 
-        import Utilities
-        from Utilities import movoto as utils_movoto
-        from Utilities.movoto import settings as utils_settings
+#         import Utilities
+#         from Utilities import movoto as utils_movoto
+#         from Utilities.movoto import settings as utils_settings
 
-        self._orig_utilities = Utilities
-        self._orig_movoto = utils_movoto
-        self._movoto_settings = utils_settings
+#         self._orig_utilities = Utilities
+#         self._orig_movoto = utils_movoto
+#         self._movoto_settings = utils_settings
 
-        _self = self
+#         _self = self
 
-        class SettingsMock(object):
+#         class SettingsMock(object):
 
-            def __getattr__(self, name):
-                if getattr(_self, '_is_patched_utilities', None):
-                    return getattr(_self, name)
-                else:
-                    return getattr(_self._movoto_settings, name)
+#             def __getattr__(self, name):
+#                 if getattr(_self, '_is_patched_utilities', None):
+#                     return getattr(_self, name)
+#                 else:
+#                     return getattr(_self._movoto_settings, name)
 
-        class MovotoMock(object):
+#         class MovotoMock(object):
 
-            def __getattr__(self, name):
-                if name == 'settings':
-                    return SettingsMock()
-                else:
-                    return getattr(_self._orig_movoto, name)
+#             def __getattr__(self, name):
+#                 if name == 'settings':
+#                     return SettingsMock()
+#                 else:
+#                     return getattr(_self._orig_movoto, name)
 
-        class UtilitiesMock(object):
+#         class UtilitiesMock(object):
 
-            def __getattr__(self, name):
-                if name == 'movoto':
-                    return MovotoMock()
-                else:
-                    return getattr(_self._orig_utilities, name)
+#             def __getattr__(self, name):
+#                 if name == 'movoto':
+#                     return MovotoMock()
+#                 else:
+#                     return getattr(_self._orig_utilities, name)
 
-        sys.modules['Utilities'] = UtilitiesMock()
-        sys.modules['Utilities.movoto'] = MovotoMock()
-        sys.modules['Utilities.movoto.settings'] = SettingsMock()
+#         sys.modules['Utilities'] = UtilitiesMock()
+#         sys.modules['Utilities.movoto'] = MovotoMock()
+#         sys.modules['Utilities.movoto.settings'] = SettingsMock()
 
-        self._is_patched_utilities = True
+#         self._is_patched_utilities = True
 
-    def unpatch_utilities(self):
-        if not getattr(self, '_is_patched_utilities', None):
-            return
+#     def unpatch_utilities(self):
+#         if not getattr(self, '_is_patched_utilities', None):
+#             return
 
-        sys.modules['Utilities'] = self._orig_utilities
-        sys.modules['Utilities.movoto'] = self._orig_movoto
-        sys.modules['Utilities.movoto.settings'] = self._orig_movoto.settings
-        self._is_patched_utilities = False
+#         sys.modules['Utilities'] = self._orig_utilities
+#         sys.modules['Utilities.movoto'] = self._orig_movoto
+#         sys.modules['Utilities.movoto.settings'] = self._orig_movoto.settings
+#         self._is_patched_utilities = False
 
 
-class MLoggerMixin:
-    def get_mlogger(self, *args, **kw):
-        """(deprecated) Get lazy-init mlogger
+# class MLoggerMixin:
+#     def get_mlogger(self, *args, **kw):
+#         """(deprecated) Get lazy-init mlogger
 
-        If pass no arguments, will return last setuped logger
+#         If pass no arguments, will return last setuped logger
 
-        DEPRECATED:
-            now you can set logger, then save logger in opt by ``opt.set_option('logger', logger)``
-        """
-        if getattr(self, '_mlogger', None) and not args and not kw:
-            return self._mlogger
-        else:
-            self._mlogger = LazyMLogger(*args, **kw)
-            return self._mlogger
+#         DEPRECATED:
+#             now you can set logger, then save logger in opt by ``opt.set_option('logger', logger)``
+#         """
+#         if getattr(self, '_mlogger', None) and not args and not kw:
+#             return self._mlogger
+#         else:
+#             self._mlogger = LazyMLogger(*args, **kw)
+#             return self._mlogger
 
 
 @singleton
 class Options(ArgparseMixin,
-              ConvertFailureLog,
-              UtilitiesMixin,
-              MLoggerMixin,
               object):
     """Configuration Manager
 
@@ -209,14 +206,14 @@ class Options(ArgparseMixin,
         self._private_settings = None
         self._inner_settings = {}
 
-        try:  # load Utilities settings
-            movoto_settings = self.load_utilities_settings()
-        except KippOptionsException:
-            self._movoto_settings = None
-            get_logger().warning('can not found ``Utilities`` in PYTHONPATH')
-        else:
-            get_logger().info('setup settings from Utilities')
-            self._movoto_settings = movoto_settings
+        # try:  # load Utilities settings
+        #     movoto_settings = self.load_utilities_settings()
+        # except KippOptionsException:
+        #     self._movoto_settings = None
+        #     get_logger().warning('can not found ``Utilities`` in PYTHONPATH')
+        # else:
+        #     get_logger().info('setup settings from Utilities')
+        #     self._movoto_settings = movoto_settings
 
         try:  # load private settings
             from settings import settings_local as private_settings
@@ -268,9 +265,9 @@ class Options(ArgparseMixin,
         elif hasattr(self._project_settings, name):
             get_logger().debug('load attr %s from project settings', name)
             return getattr(self._project_settings, name)
-        elif hasattr(self._movoto_settings, name):
-            get_logger().debug('load attr from %s movoto Utilities', name)
-            return getattr(self._movoto_settings, name)
+        # elif hasattr(self._movoto_settings, name):
+        #     get_logger().debug('load attr from %s movoto Utilities', name)
+        #     return getattr(self._movoto_settings, name)
         else:
             raise AttributeError("attribute `{}` Not Found in kipp.options".format(name))
 

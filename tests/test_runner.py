@@ -10,6 +10,7 @@ from kipp.options import options as opt
 from .base import BaseTestCase, patch
 
 
+@skipIf(True, 'need utilities')
 class RunnerTestCase(BaseTestCase):
 
     def setUp(self):

@@ -77,22 +77,22 @@ def get_wrap_handler(target_logger):
     return _WrapperHandler()
 
 
-def set_logger(logger):
-    """Replace kipp internal logger
+# def set_logger(logger):
+#     """Replace kipp internal logger
 
-    Since of only Utilities' logger can output to file,
-    so you need to replace the kipp' internal logger with Utilities' logger
-    to save your logs to file.
+#     Since of only Utilities' logger can output to file,
+#     so you need to replace the kipp' internal logger with Utilities' logger
+#     to save your logs to file.
 
-    Usage:
-    ::
-        from kipp.utils import set_logger
-        from Utilities.movoto.Mlogger import Mlogger
+#     Usage:
+#     ::
+#         from kipp.utils import set_logger
+#         from Utilities.movoto.Mlogger import Mlogger
 
-        utilities_logger = Mlogger(xxx)
-        set_logger(utilities_logger)
-    """
-    handler = get_wrap_handler(logger)
-    get_logger().addHandler(handler)
-    for dep_logger_name in ('tornado', 'concurrent'):
-        logging.getLogger(dep_logger_name).addHandler(handler)
+#         utilities_logger = Mlogger(xxx)
+#         set_logger(utilities_logger)
+#     """
+#     handler = get_wrap_handler(logger)
+#     get_logger().addHandler(handler)
+#     for dep_logger_name in ('tornado', 'concurrent'):
+#         logging.getLogger(dep_logger_name).addHandler(handler)

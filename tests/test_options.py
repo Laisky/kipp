@@ -49,10 +49,10 @@ class OptionsTestCase(TestCase):
                 self.origin_modules.update({m: i})
 
     def tearDown(self):
-        try:
-            self.opt.unpatch_utilities()
-        except Exception:
-            pass
+        # try:
+        #     self.opt.unpatch_utilities()
+        # except Exception:
+        #     pass
 
         for m in list(sys.modules.keys()):
             if m == 'kipp' or m.startswith('kipp.') \
