@@ -85,7 +85,7 @@ setup(
     author_email='ppcelery@gmail.com',
     description='Python Utils',
     long_description=long_description,
-    url='https://github.com/Laisky/ramjet',
+    url='https://github.com/Laisky/kipp',
     license='MIT License',
     entry_points="""\
         [console_scripts]
