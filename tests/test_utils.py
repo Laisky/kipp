@@ -6,7 +6,7 @@ import os
 import time
 
 from .base import BaseTestCase
-from kipp.utils import IOTA, generate_validate_fname, sleep
+from kipp.utils import IOTA, generate_validate_fname, sleep, DFAFilter
 
 
 class UtilsTestCase(BaseTestCase):
@@ -44,3 +44,14 @@ class UtilsTestCase(BaseTestCase):
         start_at = time.time()
         sleep(1.5)
         self.assertGreaterEqual(time.time() - start_at, 1.5)
+
+    def test_dfafilter(self):
+        keywords = set(['一二三', '一二二', '三二一'])
+        raw_text = '''
+            解决2力度 打击2iu 日3 一二三进ℹ️节日2 一二二将诶饿了13饿三二
+            '''
+
+        f = DFAFilter()
+        f.build_chains(keywords)
+        results = f.load_keywords(raw_text)
+        self.assertEqual(results, set(['一二三', '一二二']))
