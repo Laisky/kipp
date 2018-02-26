@@ -37,19 +37,21 @@ FROM_ADDRESS = 'mls-normalizer-ng@movoto.com'
 
 
 class EmailSender(object):
-    def __init__(self, host=HOST, port=None, username=None, passwd=None, logger=None):
+    def __init__(self, host=HOST, port=None, username=None, passwd=None, logger=None, use_tls=True):
         """Initiallize EmailSender
 
         Args:
             host (str, default movoto): SMTP server host
             port (int, default=None): SMTP server port
             logger (logging.logger, default=kipp_internal_logger):
+            use_tls (bool, default=True)
         """
         self._host = host
         self._port = port
         self._user = username
         self._passwd = passwd
         self._logger = logger
+        self._use_tls = use_tls
 
     def set_smtp_host(self, host):
         assert host, 'smtp host should not be empty'
@@ -124,7 +126,9 @@ class EmailSender(object):
 
         try:
             s = smtplib.SMTP(self._host, self._port)
-            s.starttls()
+            if self._use_tls:
+                s.starttls()
+
             if self._user and self._passwd:
                 s.login(self._user, self._passwd)
 
