@@ -117,6 +117,14 @@ class OptionsTestCase(TestCase):
         del self.opt['abc']  # __delitem__
         self.assertRaises(AttributeError, lambda: self.opt.abc)
 
+    # def test_set_option(self):
+    #     self.opt.set_option('n', 100)
+    #     self.assertEqual(self.opt.n, 100)
+    #     self.opt.n += 1
+    #     self.assertEqual(self.opt.n, 101)
+    #     self.opt.set_option('n', 0)
+    #     self.assertEqual(self.opt.n, 0)
+
     # def test_patch(self):
     #     class EnvSettingsMock(object):
     #         def __getattr__(self, name):
