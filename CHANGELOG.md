@@ -2,6 +2,8 @@
 *CURRENT*
 ---
     
+- 2018-06-28 (Laisky) fix: compatible to pip v10 -> [view commit](https://github.com/Laisky/kipp/commit//e5b56e1fec1752dc476e38642b1fe1f7bcba8648)
+- 2018-03-07 (Laisky) ci: changelog -> [view commit](https://github.com/Laisky/kipp/commit//2e8047664898c9872d4ed04407eaf520f5bcc3d0)
 - 2018-03-07 (Laisky) fix: add `set_logger` -> [view commit](https://github.com/Laisky/kipp/commit//5b6938ee987c87e4baefce19b614ff4a2ce3aa26)
 - 2018-02-26 (Laisky) fix: add `use_tls=True` to EmailSender -> [view commit](https://github.com/Laisky/kipp/commit//4d1340eab8d7a26d47431ed20a7d35b0b925987b)
 - 2017-12-15 (Laisky) docs: index page error -> [view commit](https://github.com/Laisky/kipp/commit//447150927c760585179ff911aabc99238562aa13)
