@@ -13,9 +13,9 @@ Uniform arguments entrypoint.
 from __future__ import unicode_literals, absolute_import
 import os
 import copy
-import sys
+# import sys
 import importlib
-from imp import load_source
+# from imp import load_source
 
 from kipp.libs import singleton
 from kipp.utils import get_logger
