@@ -2,6 +2,9 @@
 *CURRENT*
 ---
     
+- 2018-11-05 (Laisky) fix: typo -> [view commit](https://github.com/Laisky/kipp/commit//7bba38cd10f5890fd500fe3d3b83b2c4c6524f07)
+- 2018-08-02 (Laisky) fix: requirements -> [view commit](https://github.com/Laisky/kipp/commit//c0af07b2671ad80533609c29442477e7d8f5c5cb)
+- 2018-06-28 (Laisky) ci: changelog -> [view commit](https://github.com/Laisky/kipp/commit//2e7f2f624c3b9a1c3c47bb5bf876df4f98e6cd8c)
 - 2018-06-28 (Laisky) fix: compatible to pip v10 -> [view commit](https://github.com/Laisky/kipp/commit//e5b56e1fec1752dc476e38642b1fe1f7bcba8648)
 - 2018-03-07 (Laisky) ci: changelog -> [view commit](https://github.com/Laisky/kipp/commit//2e8047664898c9872d4ed04407eaf520f5bcc3d0)
 - 2018-03-07 (Laisky) fix: add `set_logger` -> [view commit](https://github.com/Laisky/kipp/commit//5b6938ee987c87e4baefce19b614ff4a2ce3aa26)
