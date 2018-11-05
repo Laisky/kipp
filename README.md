@@ -1,6 +1,6 @@
 # Kipp
 
-| ![kipp](http://7xjvpy.dl1.z0.glb.clouddn.com/nolan-comic-ft.jpg)
+| ![kipp](https://s3.laisky.com/uploads/2018/10/kipp.jpg)
 | :---------------------------------------------------------------:
 |                       Humanistic Utilities
 
@@ -10,6 +10,8 @@
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
 ---
+
+[Github](https://github.com/Laisky/kipp/tree/master/kipp)
 
 ## Document
 
