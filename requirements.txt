@@ -2,7 +2,7 @@
 regex==2017.01.17
 ruamel.yaml~=0.14
 convertdate  # 2.1.1
-dateparser~=0.5.1
+dateparser~=0.7
 ephem~=3.7.6.0
 humanize~=0.5
 six~=1.10
@@ -13,7 +13,7 @@ future==0.16.0
 futures~=3.1.1
 
 # datetime
-maya~=0.1
+maya~=0.5
 pytz~=2016.10
 
 # aio & libs
