@@ -1,6 +1,6 @@
 # Kipp
 
-| ![kipp](http://7xjvpy.dl1.z0.glb.clouddn.com/nolan-comic-ft.jpg)
+| ![kipp](https://s3.laisky.com/uploads/2019/06/nolan-comic-ft.jpg)
 | :---------------------------------------------------------------:
 |                       Humanistic Utilities
 
