@@ -7,7 +7,10 @@ import time
 import os
 import tempfile
 import re
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 
 from .logger import setup_logger, get_logger
 from .date import UTC, CST, parse_dtstr, utcnow, cstnow
@@ -105,6 +108,9 @@ def check_is_allow_to_running(lock_fname):
             print('there is another process is still running, eixt...')
             os._exit(0)
     """
+    if not fcntl:
+        raise NotImplementedError("not support fcntl in your system")
+
     fp = open(lock_fname, 'w')
     try:
         fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
