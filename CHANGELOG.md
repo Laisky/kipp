@@ -2,6 +2,9 @@
 *CURRENT*
 ---
     
+- 2019-06-13 (Laisky) docs: update readme -> [view commit](https://github.com/Laisky/kipp/commit//32d9d23b54191dfa058b00202f16bd4d96ff1b81)
+- 2019-06-13 (Laisky) fix: compatable to windows -> [view commit](https://github.com/Laisky/kipp/commit//5d4cee7c79f9f7509cb268b0f64bfc684626f9e6)
+- 2018-11-05 (Laisky) 0.1.3 -> [view commit](https://github.com/Laisky/kipp/commit//2ab7b04926e086ab573551228474065764b1b796)
 - 2018-11-05 (Laisky) fix: typo -> [view commit](https://github.com/Laisky/kipp/commit//7bba38cd10f5890fd500fe3d3b83b2c4c6524f07)
 - 2018-08-02 (Laisky) fix: requirements -> [view commit](https://github.com/Laisky/kipp/commit//c0af07b2671ad80533609c29442477e7d8f5c5cb)
 - 2018-06-28 (Laisky) ci: changelog -> [view commit](https://github.com/Laisky/kipp/commit//2e7f2f624c3b9a1c3c47bb5bf876df4f98e6cd8c)
