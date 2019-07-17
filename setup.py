@@ -18,6 +18,12 @@ import kipp
 with open('requirements.txt') as f:
     install_requires = f.read().strip().split('\n')
 
+try:
+    import concurrent.futures
+except ImportError:
+    # py2 `concurrent.futures`
+    install_requires.append("futures")
+
 
 def update_readme_version(version):
     ver_reg = re.compile(
