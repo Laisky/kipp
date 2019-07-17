@@ -2,6 +2,12 @@
 *CURRENT*
 ---
     
+- 2019-07-17 (Laisky) fix: py3 conflict with `futures` -> [view commit](https://github.com/Laisky/kipp/commit//60188c44bc381c23d46c796db9f132e71485326f)    
+       
+*0.1.4*
+---
+    
+- 2019-06-13 (Laisky) ci: release 0.1.4 -> [view commit](https://github.com/Laisky/kipp/commit//337d50ea001eb9f143b453e33686fa2d8cf6e7c3)
 - 2019-06-13 (Laisky) docs: update readme -> [view commit](https://github.com/Laisky/kipp/commit//32d9d23b54191dfa058b00202f16bd4d96ff1b81)
 - 2019-06-13 (Laisky) fix: compatable to windows -> [view commit](https://github.com/Laisky/kipp/commit//5d4cee7c79f9f7509cb268b0f64bfc684626f9e6)
 - 2018-11-05 (Laisky) 0.1.3 -> [view commit](https://github.com/Laisky/kipp/commit//2ab7b04926e086ab573551228474065764b1b796)
