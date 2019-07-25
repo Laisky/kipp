@@ -22,7 +22,7 @@ try:
     import concurrent.futures
 except ImportError:
     # py2 `concurrent.futures`
-    install_requires.append("futures")
+    install_requires.extend(["futures", "tornado~=4.5"])
 
 
 def update_readme_version(version):
@@ -58,6 +58,7 @@ extras = {
     'test': ['pytest', 'mock'],
     'doc': ['sphinx', 'recommonmark', 'sphinxcontrib-napoleon'],
     'image': ['pillow==3.4.2',],
+    'aio': ['tornado~=4.5',],
 }
 all_extras = []
 for _, v in extras.items():
