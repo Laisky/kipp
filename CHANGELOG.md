@@ -2,7 +2,10 @@
 *CURRENT*
 ---
     
-- 2019-07-17 (Laisky) fix: py3 conflict with `futures` -> [view commit](https://github.com/Laisky/kipp/commit//60188c44bc381c23d46c796db9f132e71485326f)    
+- 2019-07-25 (Laisky) feat: opt support children options -> [view commit](https://github.com/Laisky/kipp/commit//2cc9c60814baa538b8b409589cdc51da1c2ded7c)
+- 2019-07-17 (Laisky) ci: release 0.1.5 -> [view commit](https://github.com/Laisky/kipp/commit//621dd00895df0b8870dcb3f5b681265a008934db)
+- 2019-07-17 (Laisky) fix: py3 conflict with `futures` -> [view commit](https://github.com/Laisky/kipp/commit//60188c44bc381c23d46c796db9f132e71485326f)
+- 2018-11-05 (Laisky) docs: update readme -> [view commit](https://github.com/Laisky/kipp/commit//372f27464e22912d0dd639b5e618d078222a46fe)    
        
 *0.1.4*
 ---
