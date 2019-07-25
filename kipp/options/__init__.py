@@ -17,7 +17,7 @@ import copy
 import importlib
 # from imp import load_source
 
-from kipp.libs import singleton
+from kipp.libs import SingletonMixin
 from kipp.utils import get_logger
 # from .mlogger import LazyMLogger, ConvertFailureLog
 from .arguments import ArgparseMixin
@@ -118,9 +118,96 @@ from .exceptions import KippOptionsException
 #             return self._mlogger
 
 
-@singleton
-class Options(ArgparseMixin,
-              object):
+class OptionKeyTypeConflictError(KippOptionsException):
+    pass
+
+class BaseOptions(object):
+
+    def __init__(self, is_allow_overwrite_child_opt=True):
+        self._inner_settings = {}
+        self._is_allow_overwrite_child_opt = is_allow_overwrite_child_opt
+
+    def create_option(self):
+        return BaseOptions()
+
+    @property
+    def is_allow_overwrite_child_opt(self):
+        return self._is_allow_overwrite_child_opt
+
+    @is_allow_overwrite_child_opt.setter
+    def is_allow_overwrite_child_opt(self, val):
+        assert isinstance(val, bool), 'must be bool'
+        self._is_allow_overwrite_child_opt = val
+
+    def set_option(self, name, val):
+        """Set your own attribute's name and value
+
+        If name contains `.`, will auto create child option
+        """
+        if '.' not in name:
+            self._inner_settings[name] = val
+            return
+
+        children = name.split('.')
+        opt = self
+        for child in children[:-1]:
+            if child not in opt:
+                opt.set_option(child, self.create_option())
+            elif not isinstance(opt[child], BaseOptions):
+                if self._is_allow_overwrite_child_opt:
+                    opt.set_option(child, self.create_option())  # overwrite
+                else:
+                    raise OptionKeyTypeConflictError("{} already exists but type is not BaseOption".format(child))
+
+            opt = opt[child]
+
+        last_key = children[-1]
+        if last_key in opt and isinstance(opt[last_key], BaseOptions) and not self._is_allow_overwrite_child_opt:
+            raise OptionKeyTypeConflictError('must not overwrite child option')
+
+        opt.set_option(last_key, val)
+
+    __setitem__ = set_option
+
+    def del_option(self, name):
+        """Delete your own attribute by name"""
+        if name in self._inner_settings:
+            del self._inner_settings[name]
+
+    __delitem__ = del_option
+
+    def get_option(self, name):
+        """If you overwrite `get_option`, you need rewrite
+        `__getitem__ = __getattr__ = get_option`
+        """
+        if '.' not in name:
+            if name not in self._inner_settings:
+                raise AttributeError
+            else:
+                return self._inner_settings[name]
+
+        opt = self
+        for child in name.split('.'):
+            if not isinstance(opt, BaseOptions) or child not in opt:
+                raise AttributeError
+
+            opt = opt[child]
+
+        return opt
+
+    __getitem__ = __getattr__ = get_option
+
+    def __contains__(self, name):
+        """Override ``in`` operator"""
+        try:
+            self.get_option(name)
+        except AttributeError:
+            return False
+        else:
+            return True
+
+
+class Options(BaseOptions, ArgparseMixin, SingletonMixin):
     """Configuration Manager
 
     Relate to `DATA-1026`_.
@@ -196,7 +283,8 @@ class Options(ArgparseMixin,
 
     """
 
-    def __init__(self):
+    def __init__(self, is_allow_overwrite_child_opt=True):
+        super(Options, self).__init__(is_allow_overwrite_child_opt=is_allow_overwrite_child_opt)
         self.setup_env_settings()
 
     def setup_env_settings(self):
@@ -204,7 +292,6 @@ class Options(ArgparseMixin,
         self._environ = copy.deepcopy(os.environ)
         self._env_settings = None
         self._private_settings = None
-        self._inner_settings = {}
 
         # try:  # load Utilities settings
         #     movoto_settings = self.load_utilities_settings()
@@ -233,23 +320,15 @@ class Options(ArgparseMixin,
 
         self.load_specifical_settings()  # load env from environment
 
-    def set_option(self, name, val):
-        """Set your own attribute's name and value"""
-        self._inner_settings[name] = val
-
-    __setitem__ = set_option
-
-    def del_option(self, name):
-        """Delete your own attribute by name"""
-        if name in self._inner_settings:
-            del self._inner_settings[name]
-
-    __delitem__ = del_option
-
     def get_option(self, name):
-        if name in self._inner_settings:
+        try:
+            val = super(Options, self).get_option(name)
+        except AttributeError:
+            pass
+        else:
             get_logger().debug('load attr %s from inner settings', name)
-            return self._inner_settings[name]
+            return val
+
         if hasattr(self._command_args, name):
             get_logger().debug('load attr %s from command args', name)
             return getattr(self._command_args, name)
@@ -268,19 +347,10 @@ class Options(ArgparseMixin,
         # elif hasattr(self._movoto_settings, name):
         #     get_logger().debug('load attr from %s movoto Utilities', name)
         #     return getattr(self._movoto_settings, name)
-        else:
-            raise AttributeError("attribute `{}` Not Found in kipp.options".format(name))
+
+        raise AttributeError("attribute `{}` Not Found in kipp.options".format(name))
 
     __getitem__ = __getattr__ = get_option
-
-    def __contains__(self, name):
-        """Override ``in`` operator"""
-        try:
-            self.get_option(name)
-        except AttributeError:
-            return False
-        else:
-            return True
 
     def load_specifical_settings(self, env=None):
         env = env or os.environ.get('TARS_ENV', None)

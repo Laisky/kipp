@@ -13,6 +13,9 @@ try:
 except ImportError:
     from mock import patch
 
+from kipp.options import BaseOptions
+from kipp.exceptions import OptionKeyTypeConflictError
+
 
 class OptionsTestCase(TestCase):
 
@@ -162,3 +165,28 @@ class OptionsTestCase(TestCase):
         self.assertEqual(self.opt.test, '1')
         self.assertEqual(self.opt.test2, 'qq')
         self.assertEqual(self.opt.test3, 'default')
+
+    def test_children(self):
+        self.opt.set_option('a.b.c', 123)
+        self.opt.set_option('a.c', 22)
+        self.opt.is_allow_overwrite_child_opt = False
+        def fault_set_is_allow_overwrite_child_opt():
+            self.opt.is_allow_overwrite_child_opt = 123
+        self.assertRaises(AssertionError, fault_set_is_allow_overwrite_child_opt)
+
+        print(self.opt._inner_settings)
+        print(self.opt._inner_settings['a']._inner_settings)
+
+        self.assertIsInstance(self.opt['a'], BaseOptions)
+        self.assertIsInstance(self.opt['a.b'], BaseOptions)
+        self.assertRaises(OptionKeyTypeConflictError, lambda: self.opt.set_option('a.b', 1))
+        self.assertEqual(self.opt['a.b.c'], 123)
+        self.assertEqual(self.opt['a.c'], 22)
+
+        # allow conflict
+        self.opt.is_allow_overwrite_child_opt = True
+        self.opt.set_option('a.b', 11)
+        self.assertEqual(self.opt['a.b'], 11)
+        child_a = self.opt.a
+        self.assertEqual(child_a.b, 11)
+        self.assertRaises(AttributeError, lambda: self.opt['a.b.c'])

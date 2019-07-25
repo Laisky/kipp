@@ -76,7 +76,6 @@ class SqlHelper:
         if PY2:
             get_logger().info('set SqlHelper for py2')
             from Utilities.movoto import settings
-            print(settings)
             self.sqlhelper = Py2SqlHelper(*args, **kw)
         elif PY3:
             get_logger().info('set SqlHelper for py3')

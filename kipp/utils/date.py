@@ -15,7 +15,6 @@ Usage
     # import datetime functions
     from kipp.utils import parse_dtstr, utcnow, cstnow
 
-
 """
 
 from __future__ import unicode_literals
