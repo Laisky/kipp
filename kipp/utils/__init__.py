@@ -6,6 +6,8 @@ from threading import RLock
 import time
 import os
 import tempfile
+from functools import wraps
+from collections import namedtuple
 import re
 try:
     import fcntl

@@ -146,3 +146,39 @@ def timeout(seconds_before_timeout):
         new_f.func_name = f.func_name
         return new_f
     return decorate
+
+def timeout_cache(expires_sec=30):
+    """Decorator to cache return until expires
+
+    Args:
+        expires_sec (int): cache expires time
+
+    Examples:
+    ::
+    import time
+
+    from kipp.utils import timeout_cache
+
+    @timeout_cache(expires_sec=2)
+    def demo():
+        return time.time()
+
+    r = demo()
+    time.sleep(1)
+    r == demo()
+
+    """
+    state = {
+        'cache': None,
+        'timeout_at': None,
+    }
+    def decorator(f):
+        @functools.wraps(f)
+        def wrapper(*args, **kw):
+            if not state['timeout_at'] or time.time() > state['timeout_at']:
+                state['cache'] = f(*args, **kw)
+                state['timeout_at'] = time.time() + expires_sec
+
+            return state['cache']
+        return wrapper
+    return decorator
