@@ -9,6 +9,9 @@ import os
 import sys
 import datetime
 import signal
+from collections import namedtuple, defaultdict
+
+import xxhash
 
 from kipp.utils import get_logger
 
@@ -147,7 +150,15 @@ def timeout(seconds_before_timeout):
         return new_f
     return decorate
 
-def timeout_cache(expires_sec=30):
+
+def calculate_args_hash(*args, **kw):
+    return xxhash.xxh32(str(args)+str(kw)).hexdigest()
+
+
+CacheItem = namedtuple("item", ['data', 'timeout_at'])
+
+
+def timeout_cache(expires_sec=30, max_size=128):
     """Decorator to cache return until expires
 
     Args:
@@ -168,17 +179,22 @@ def timeout_cache(expires_sec=30):
     r == demo()
 
     """
-    state = {
-        'cache': None,
-        'timeout_at': None,
-    }
+    state = {}  # {hkey: CacheItem}
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kw):
-            if not state['timeout_at'] or time.time() > state['timeout_at']:
-                state['cache'] = f(*args, **kw)
-                state['timeout_at'] = time.time() + expires_sec
+            hkey = calculate_args_hash(*args, **kw)
+            if hkey not in state or state[hkey].timeout_at < time.time():
+                state[hkey] = CacheItem(
+                    timeout_at=time.time() + expires_sec,
+                    data=f(*args, **kw),
+                )
 
-            return state['cache']
+            if len(state) > max_size:  # remove expired keys
+                for k in list(state.keys()):
+                    if state[k].timeout_at > time.time():
+                        del state[k]
+
+            return state[hkey].data
         return wrapper
     return decorator

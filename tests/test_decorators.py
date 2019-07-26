@@ -13,13 +13,14 @@ class UtilsTestCase(BaseTestCase):
 
     def test_timeout_cache(self):
         @timeout_cache(expires_sec=2)
-        def demo():
+        def demo(n=None):
             return time.time()
 
         r = demo()
         self.assertEqual(demo(), r)
         time.sleep(1)
         self.assertEqual(demo(), r)
+        self.assertNotEqual(demo(1), r)
         time.sleep(2)
         self.assertNotEqual(demo(), r)
 
