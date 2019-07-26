@@ -17,3 +17,5 @@ pytz~=2016.10
 
 # aio & libs
 # tornado~=4.5
+
+xxhash~=1.3
