@@ -2,6 +2,8 @@
 *CURRENT*
 ---
     
+- 2019-07-26 (Laisky) fix: timeout_cache args aware -> [view commit](https://github.com/Laisky/kipp/commit//ebd238685ba18dd120d002504ab2ed9c0a1f9da5)
+- 2019-07-25 (Laisky) ci: release 0.2.2 -> [view commit](https://github.com/Laisky/kipp/commit//8c47bc8bcb000434ad031722ffbec963c844a1c9)
 - 2019-07-25 (Laisky) feat: add `timeout_cache` -> [view commit](https://github.com/Laisky/kipp/commit//771aaf13ad5289f3f620c0a02fb082bd144089e5)
 - 2019-07-25 (Laisky) ci: release 0.2.1 -> [view commit](https://github.com/Laisky/kipp/commit//77590006d26580d9284623bb4f054b8df68ecb27)
 - 2019-07-25 (Laisky) docs: update licence -> [view commit](https://github.com/Laisky/kipp/commit//9f0abaf5185713d6cf65f5fb2821c2ad9a2e56c6)
