@@ -190,10 +190,10 @@ def timeout_cache(expires_sec=30, max_size=128):
                     data=f(*args, **kw),
                 )
 
-            if len(state) > max_size:  # remove expired keys
-                for k in list(state.keys()):
-                    if state[k].timeout_at > time.time():
-                        del state[k]
+                if len(state) > max_size:  # remove expired keys
+                    for k in list(state.keys()):
+                        if state[k].timeout_at > time.time():
+                            del state[k]
 
             return state[hkey].data
         return wrapper
