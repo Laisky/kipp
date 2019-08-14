@@ -2,6 +2,8 @@
 *CURRENT*
 ---
     
+- 2019-08-14 (Laisky) fix: timeout_cache bug -> [view commit](https://github.com/Laisky/kipp/commit//24132687246bd820111343ece49987f2b98148a6)
+- 2019-08-05 (Laisky) ci: release 0.2.4 -> [view commit](https://github.com/Laisky/kipp/commit//2bc5bda6e7f593f89be662f46fed350c9daabded)
 - 2019-08-05 (Laisky) fix: tornado req -> [view commit](https://github.com/Laisky/kipp/commit//841fc8400d2e6739a7fd0a8781d39da057da698f)
 - 2019-07-26 (Laisky) build: reduce requirements -> [view commit](https://github.com/Laisky/kipp/commit//8dac88c6ee511de33731926b34ac170eb6e6e418)
 - 2019-07-26 (Laisky) perf: reduce check frequency for timeout_cache -> [view commit](https://github.com/Laisky/kipp/commit//a9dff7f9fc0b854cf0a2824b3016a732671ba545)
