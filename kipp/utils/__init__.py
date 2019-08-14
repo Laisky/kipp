@@ -24,6 +24,17 @@ from .dfa_filters import DFAFilter
 email_sender = EmailSender()
 
 
+def timer(func):
+    @wraps(func)
+    def wrapper(*args, **kw):
+        logger.info(f"{func.__name__} running...")
+        try:
+            return func(*args, **kw)
+        finally:
+            logger.info(f"{func.__name__} end")
+    return wrapped
+
+
 class IOTA(object):
     """Simple Counter
 

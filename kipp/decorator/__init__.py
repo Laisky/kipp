@@ -179,21 +179,23 @@ def timeout_cache(expires_sec=30, max_size=128):
     r == demo()
 
     """
+    assert expires_sec > 0, f"expires_sec should greater than 0, but got {expires_sec}"
+    assert max_size > 0, f"max_size should greater than 0, but got {max_size}"
     state = {}  # {hkey: CacheItem}
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kw):
             hkey = calculate_args_hash(*args, **kw)
             if hkey not in state or state[hkey].timeout_at < time.time():
-                state[hkey] = CacheItem(
-                    timeout_at=time.time() + expires_sec,
-                    data=f(*args, **kw),
-                )
-
                 if len(state) > max_size:  # remove expired keys
                     for k in list(state.keys()):
                         if state[k].timeout_at > time.time():
                             del state[k]
+
+                state[hkey] = CacheItem(
+                    timeout_at=time.time() + expires_sec,
+                    data=f(*args, **kw),
+                )
 
             return state[hkey].data
         return wrapper
