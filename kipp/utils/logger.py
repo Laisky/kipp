@@ -19,7 +19,7 @@ LOGNAME = 'kipp'  # kipp internal logger name
 
 
 def get_formatter():
-    formatter = logging.Formatter('[%(asctime)sZ - %(levelname)s - %(name)s] - %(message)s')
+    formatter = logging.Formatter('[%(asctime)s - %(levelname)s - %(pathname)s:%(lineno)d - %(name)s] - %(message)s')
     formatter.converter = time.gmtime
     return formatter
 
