@@ -13,12 +13,15 @@ Uniform arguments entrypoint.
 from __future__ import unicode_literals, absolute_import
 import os
 import copy
+
 # import sys
 import importlib
+
 # from imp import load_source
 
 from kipp.libs import SingletonMixin
 from kipp.utils import get_logger
+
 # from .mlogger import LazyMLogger, ConvertFailureLog
 from .arguments import ArgparseMixin
 from .exceptions import KippOptionsException
@@ -121,8 +124,8 @@ from .exceptions import KippOptionsException
 class OptionKeyTypeConflictError(KippOptionsException):
     pass
 
-class BaseOptions(object):
 
+class BaseOptions(object):
     def __init__(self, is_allow_overwrite_child_opt=True):
         self._inner_settings = {}
         self._is_allow_overwrite_child_opt = is_allow_overwrite_child_opt
@@ -136,7 +139,7 @@ class BaseOptions(object):
 
     @is_allow_overwrite_child_opt.setter
     def is_allow_overwrite_child_opt(self, val):
-        assert isinstance(val, bool), 'must be bool'
+        assert isinstance(val, bool), "must be bool"
         self._is_allow_overwrite_child_opt = val
 
     def set_option(self, name, val):
@@ -144,11 +147,11 @@ class BaseOptions(object):
 
         If name contains `.`, will auto create child option
         """
-        if '.' not in name:
+        if "." not in name:
             self._inner_settings[name] = val
             return
 
-        children = name.split('.')
+        children = name.split(".")
         opt = self
         for child in children[:-1]:
             if child not in opt:
@@ -157,13 +160,19 @@ class BaseOptions(object):
                 if self._is_allow_overwrite_child_opt:
                     opt.set_option(child, self.create_option())  # overwrite
                 else:
-                    raise OptionKeyTypeConflictError("{} already exists but type is not BaseOption".format(child))
+                    raise OptionKeyTypeConflictError(
+                        "{} already exists but type is not BaseOption".format(child)
+                    )
 
             opt = opt[child]
 
         last_key = children[-1]
-        if last_key in opt and isinstance(opt[last_key], BaseOptions) and not self._is_allow_overwrite_child_opt:
-            raise OptionKeyTypeConflictError('must not overwrite child option')
+        if (
+            last_key in opt
+            and isinstance(opt[last_key], BaseOptions)
+            and not self._is_allow_overwrite_child_opt
+        ):
+            raise OptionKeyTypeConflictError("must not overwrite child option")
 
         opt.set_option(last_key, val)
 
@@ -180,14 +189,14 @@ class BaseOptions(object):
         """If you overwrite `get_option`, you need rewrite
         `__getitem__ = __getattr__ = get_option`
         """
-        if '.' not in name:
+        if "." not in name:
             if name not in self._inner_settings:
                 raise AttributeError
             else:
                 return self._inner_settings[name]
 
         opt = self
-        for child in name.split('.'):
+        for child in name.split("."):
             if not isinstance(opt, BaseOptions) or child not in opt:
                 raise AttributeError
 
@@ -284,7 +293,9 @@ class Options(BaseOptions, ArgparseMixin, SingletonMixin):
     """
 
     def __init__(self, is_allow_overwrite_child_opt=True):
-        super(Options, self).__init__(is_allow_overwrite_child_opt=is_allow_overwrite_child_opt)
+        super(Options, self).__init__(
+            is_allow_overwrite_child_opt=is_allow_overwrite_child_opt
+        )
         self.setup_env_settings()
 
     def setup_env_settings(self):
@@ -307,7 +318,7 @@ class Options(BaseOptions, ArgparseMixin, SingletonMixin):
         except ImportError:
             self._private_settings = None
         else:
-            get_logger().info('setup settings from settings_local.py')
+            get_logger().info("setup settings from settings_local.py")
             self._private_settings = private_settings
 
         try:  # load project settings
@@ -315,7 +326,7 @@ class Options(BaseOptions, ArgparseMixin, SingletonMixin):
         except ImportError:
             self._project_settings = None
         else:
-            get_logger().info('setup settings from settings.py')
+            get_logger().info("setup settings from settings.py")
             self._project_settings = project_settings
 
         self.load_specifical_settings()  # load env from environment
@@ -326,23 +337,23 @@ class Options(BaseOptions, ArgparseMixin, SingletonMixin):
         except AttributeError:
             pass
         else:
-            get_logger().debug('load attr %s from inner settings', name)
+            get_logger().debug("load attr %s from inner settings", name)
             return val
 
         if hasattr(self._command_args, name):
-            get_logger().debug('load attr %s from command args', name)
+            get_logger().debug("load attr %s from command args", name)
             return getattr(self._command_args, name)
         elif name in self._environ:
-            get_logger().debug('load attr %s from environ', name)
+            get_logger().debug("load attr %s from environ", name)
             return self._environ[name]
         elif hasattr(self._env_settings, name):
-            get_logger().debug('load attr %s from env settings', name)
+            get_logger().debug("load attr %s from env settings", name)
             return getattr(self._env_settings, name)
         elif hasattr(self._private_settings, name):
-            get_logger().debug('load attr %s from private settings', name)
+            get_logger().debug("load attr %s from private settings", name)
             return getattr(self._private_settings, name)
         elif hasattr(self._project_settings, name):
-            get_logger().debug('load attr %s from project settings', name)
+            get_logger().debug("load attr %s from project settings", name)
             return getattr(self._project_settings, name)
         # elif hasattr(self._movoto_settings, name):
         #     get_logger().debug('load attr from %s movoto Utilities', name)
@@ -353,24 +364,26 @@ class Options(BaseOptions, ArgparseMixin, SingletonMixin):
     __getitem__ = __getattr__ = get_option
 
     def load_specifical_settings(self, env=None):
-        env = env or os.environ.get('TARS_ENV', None)
+        env = env or os.environ.get("TARS_ENV", None)
         if not env:
             return
 
         try:
-            settings_fname = 'settings.settings_{}'.format(env)
+            settings_fname = "settings.settings_{}".format(env)
             env_settings = importlib.import_module(settings_fname)
         except ImportError:
-            raise KippOptionsException('Can not found env settings_{}'.format(env))
+            raise KippOptionsException("Can not found env settings_{}".format(env))
         else:
             self._env_settings = env_settings
-            get_logger().info('Setup specifical settings from settings_%s', env)
+            get_logger().info("Setup specifical settings from settings_%s", env)
 
     def set_command_args(self, args, is_patch_utilies=True):
         """"Setup with argparse"""
         self._command_args = args
-        if hasattr(args, 'env'):
-            get_logger().warning('You should better to use TARS_ENV environment to set run env')
+        if hasattr(args, "env"):
+            get_logger().warning(
+                "You should better to use TARS_ENV environment to set run env"
+            )
             self.load_specifical_settings(args.env)
 
         # no need for public use

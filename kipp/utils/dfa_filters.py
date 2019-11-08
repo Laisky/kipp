@@ -21,7 +21,7 @@ class DFAFilter:
         Returns:
             set: keywords that in raw_text
         """
-        assert getattr(self, '_chains', None), 'Should invoke build_chains first'
+        assert getattr(self, "_chains", None), "Should invoke build_chains first"
         return self.filter_keyword(raw_text)
 
     def build_chains(self, keywords):
@@ -50,10 +50,9 @@ class DFAFilter:
         if i == n_len - 1:
             return None
 
-        return self.is_word_in_chains(chains=chains[raw_text[i]],
-                                      raw_text=raw_text,
-                                      n_len=n_len,
-                                      i=i+1)
+        return self.is_word_in_chains(
+            chains=chains[raw_text[i]], raw_text=raw_text, n_len=n_len, i=i + 1
+        )
 
     def filter_keyword(self, raw_text):
         result_keywords = set()
@@ -61,6 +60,6 @@ class DFAFilter:
         for i in range(n_len):
             li = self.is_word_in_chains(self._chains, raw_text, n_len, i)
             if li is not None:
-                result_keywords.add(raw_text[i: li+1])
+                result_keywords.add(raw_text[i : li + 1])
 
         return result_keywords

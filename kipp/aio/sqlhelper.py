@@ -43,6 +43,7 @@ class Py2SqlHelper:
 
     def __init__(self, *args, **kw):
         from Utilities.movoto.SqlHelper import SqlHelper as MovotoSqlHelper
+
         self.sqlhelper = MovotoSqlHelper(*args, **kw)
 
     def __getattr__(self, name):
@@ -71,14 +72,14 @@ class Py2SqlHelper:
 
 
 class SqlHelper:
-
     def __init__(self, *args, **kw):
         if PY2:
-            get_logger().info('set SqlHelper for py2')
+            get_logger().info("set SqlHelper for py2")
             from Utilities.movoto import settings
+
             self.sqlhelper = Py2SqlHelper(*args, **kw)
         elif PY3:
-            get_logger().info('set SqlHelper for py3')
+            get_logger().info("set SqlHelper for py3")
             self.sqlhelper = Py3SqlHelper(*args, **kw)
 
     def __getattr__(self, name):

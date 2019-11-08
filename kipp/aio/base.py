@@ -4,13 +4,17 @@
 from __future__ import print_function, unicode_literals
 from functools import wraps
 
-from kipp.libs.aio import (Return, KippAIOException, as_completed, coroutine,
-                           run_on_executor)
+from kipp.libs.aio import (
+    Return,
+    KippAIOException,
+    as_completed,
+    coroutine,
+    run_on_executor,
+)
 from kipp.utils import ThreadPoolExecutor, get_logger
 
 
 class LazyThreadPoolExecutor:
-
     def __init__(self, n_workers):
         self._n_workers = n_workers
         self.threadpoolexecutor = None
@@ -25,10 +29,11 @@ class LazyThreadPoolExecutor:
         return getattr(self.threadpoolexecutor, name)
 
     def set_n_workers(self, n_workers):
-        get_logger().info('set internal thread pool to %s', n_workers)
+        get_logger().info("set internal thread pool to %s", n_workers)
         if self.threadpoolexecutor:
             raise KippAIOException(
-                'you should not call ``set_n_workers`` when ThreadPoolExecutor is already running')
+                "you should not call ``set_n_workers`` when ThreadPoolExecutor is already running"
+            )
 
         self._n_workers = n_workers
 
@@ -44,12 +49,12 @@ def set_aio_n_workers(n_workers=10):
         n_workers (int, default=10): setup the number of workers
     """
     try:
-        assert isinstance(n_workers, int), '``n_workers`` must be integer'
-        assert n_workers > 0, '``n_workers`` must bigger than zero'
+        assert isinstance(n_workers, int), "``n_workers`` must be integer"
+        assert n_workers > 0, "``n_workers`` must bigger than zero"
     except Exception as err:
         raise KippAIOException(err)
 
-    get_logger().info('set_aio_n_workers for n_workers: %s', n_workers)
+    get_logger().info("set_aio_n_workers for n_workers: %s", n_workers)
     thread_executor.set_n_workers(n_workers)
 
 
@@ -62,6 +67,7 @@ def coroutine2(func):
         def demo():
             yield sleep(0.5)
     """
+
     @coroutine
     @wraps(func)
     def _wrap(*args, **kw):
@@ -84,7 +90,7 @@ def coroutine2(func):
             # should not raise StopIteration in a generator
             return
         except Exception as err:
-            get_logger().error('kipp.aio.coroutine2 encounter error:', exc_info=True)
+            get_logger().error("kipp.aio.coroutine2 encounter error:", exc_info=True)
             raise
 
     return _wrap
@@ -102,16 +108,17 @@ def wrapper(func):
         def demo():
             yield sleep(0.5)
     """
+
     @wraps(func)
     def _wrap(*args, **kw):
-        get_logger().error('`wrapper` is deprecated! Please use `coroutine2` instead.')
+        get_logger().error("`wrapper` is deprecated! Please use `coroutine2` instead.")
         try:
             g = func(*args, **kw)
             return g
         except (Return, StopIteration):
             raise
         except Exception as err:
-            get_logger().error('kipp.aio.wrapper encouter error: ', exc_info=True)
+            get_logger().error("kipp.aio.wrapper encouter error: ", exc_info=True)
             raise err
 
     return _wrap

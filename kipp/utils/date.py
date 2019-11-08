@@ -26,12 +26,12 @@ import pytz
 import maya
 
 
-UTC = pytz.timezone('utc')
-CST = pytz.timezone('Asia/Shanghai')
+UTC = pytz.timezone("utc")
+CST = pytz.timezone("Asia/Shanghai")
 
 _SPECIAL_DTSTR_REGEX_MAP = {
-    re.compile('^(\d{4})$'): '%H%M',
-    re.compile('^(\d{2}:\d{2}) noon$', flags=re.I): '%H:%M',
+    re.compile("^(\d{4})$"): "%H%M",
+    re.compile("^(\d{2}:\d{2}) noon$", flags=re.I): "%H:%M",
 }
 
 
@@ -44,7 +44,7 @@ def _parse_special_dtstr(dtstr):
             return UTC.localize(datetime.datetime.strptime(_dtstr, dt_fmt))
 
 
-_IGNORE_TZ_REGEX = re.compile('[+\-][0-9:]{1,5}$')
+_IGNORE_TZ_REGEX = re.compile("[+\-][0-9:]{1,5}$")
 
 
 def _extrace_dtstr_exclude_tz(dtstr):
@@ -55,11 +55,9 @@ def _extrace_dtstr_exclude_tz(dtstr):
     return dtstr[: r.start()]
 
 
-def parse_dtstr(date_str,
-                naive=False,
-                replace_tz=None,
-                convert_tz=None,
-                ignore_tz=False):
+def parse_dtstr(
+    date_str, naive=False, replace_tz=None, convert_tz=None, ignore_tz=False
+):
     """Parse datetime string to datetime object
 
     Default timezone is UTC.
@@ -101,7 +99,7 @@ def utcnow(is_naive=False):
     """Get current datetime with UTC timezone"""
     dt = datetime.datetime.utcnow()
     if not is_naive:
-        dt =  UTC.localize(dt)
+        dt = UTC.localize(dt)
 
     return dt
 

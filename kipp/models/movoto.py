@@ -45,39 +45,40 @@ class RuntimeStats:
         yield movotodb.get_runtime_stats(name)
 
     """
-    _sql_to_create_runtime_stats = '''
+
+    _sql_to_create_runtime_stats = """
         insert into runtime_stats (name, stats)
         values (%s, %s);
-        '''
-    _sql_to_update_runtime_stats = '''
+        """
+    _sql_to_update_runtime_stats = """
         update runtime_stats
         set stats=%s
         where name=%s;
-        '''
-    _RuntimeStats = namedtuple('stats', ['created_at', 'updated_at', 'stats'])
-    _sql_to_get_runtime_stats = '''
+        """
+    _RuntimeStats = namedtuple("stats", ["created_at", "updated_at", "stats"])
+    _sql_to_get_runtime_stats = """
         select created_at, updated_at, stats
         from runtime_stats
         where name=%s;
-        '''
-    _sql_to_delete_runtime_stats = '''
+        """
+    _sql_to_delete_runtime_stats = """
         delete from runtime_stats
         where name=%s;
-        '''
+        """
 
     def validate_stats(self, stats):
         try:
-            assert stats, 'stats should not empty'
-            assert isinstance(stats, basestring), 'stats should be ``str``'
-            assert len(stats) <= 200, 'the length of stats should shorter than 200'
+            assert stats, "stats should not empty"
+            assert isinstance(stats, basestring), "stats should be ``str``"
+            assert len(stats) <= 200, "the length of stats should shorter than 200"
         except AssertionError as err:
             raise DBValidateError(*err.args)
 
     def validate_name(self, name):
         try:
-            assert name, 'name should not empty'
-            assert isinstance(name, basestring), 'name should be ``str``'
-            assert len(name) <= 50, 'the length of name should shorter than 50'
+            assert name, "name should not empty"
+            assert isinstance(name, basestring), "name should be ``str``"
+            assert len(name) <= 50, "the length of name should shorter than 50"
         except AssertionError as err:
             raise DBValidateError(*err.args)
 
@@ -98,9 +99,11 @@ class RuntimeStats:
 
         try:
             r = self.conn.executeBySql(self._sql_to_create_runtime_stats, name, stats)
-        except self.get_mysqldb_exception('IntegrityError') as err:
-            if len(err.args) >= 2 and str(err.args[1]).startswith('Duplicate entry '):
-                raise DuplicateIndexError('Duplicate name in ``runtime_stats`` for {}'.format(name))
+        except self.get_mysqldb_exception("IntegrityError") as err:
+            if len(err.args) >= 2 and str(err.args[1]).startswith("Duplicate entry "):
+                raise DuplicateIndexError(
+                    "Duplicate name in ``runtime_stats`` for {}".format(name)
+                )
             else:
                 raise
         else:
@@ -148,10 +151,10 @@ class RuntimeStats:
         self.validate_name(name)
         r = self.conn.getOneBySql(self._sql_to_get_runtime_stats, name)
         if not r:
-            if 'default' in kwargs:
-                return kwargs['default']
+            if "default" in kwargs:
+                return kwargs["default"]
             else:
-                raise RecordNotFound('Can not find stats via name {}'.format(name))
+                raise RecordNotFound("Can not find stats via name {}".format(name))
 
         return self._RuntimeStats(*r)
 
@@ -182,8 +185,6 @@ class RuntimeStats:
         return f is not None
 
 
-class MovotoDB(BaseDB,
-               RuntimeStats,
-               object):
+class MovotoDB(BaseDB, RuntimeStats, object):
 
-    __db_name__ = 'movoto'
+    __db_name__ = "movoto"

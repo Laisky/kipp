@@ -91,7 +91,8 @@ from functools import wraps
 from concurrent.futures import (
     Future,
     ThreadPoolExecutor as OriginThreadPoolExecutor,
-    ProcessPoolExecutor as OriginProcessPoolExecutor)
+    ProcessPoolExecutor as OriginProcessPoolExecutor,
+)
 
 
 class KippPoolMixin:
@@ -100,6 +101,7 @@ class KippPoolMixin:
 
         Wrap a func to a coroutine by thread pool executor
         """
+
         @wraps(func)
         def wrapper(*args, **kw):
             return self.submit(func, *args, **kw)

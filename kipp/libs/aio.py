@@ -67,14 +67,15 @@ class MultiEvent(Event):
         evt.set()
         evt.is_set()  # True
     """
+
     def __init__(self, n_workers=1):
         """
         Args:
             n_workers (int, default=1): how many workers will receive this event
         """
         try:
-            assert isinstance(n_workers, int), 'MultiEvent(n_workers) should be integer'
-            assert n_workers >= 1, 'MultiEvent(n_workers) should greater than 1'
+            assert isinstance(n_workers, int), "MultiEvent(n_workers) should be integer"
+            assert n_workers >= 1, "MultiEvent(n_workers) should greater than 1"
         except AssertionError as err:
             raise KippAIOException(err)
 
@@ -172,13 +173,14 @@ def run_until_complete(future, ioloop=ioloop):
 
 
 # simple test
-if __name__ == '__main__':
+if __name__ == "__main__":
+
     @coroutine
     def demo():
         yield sleep(1)
-        print('ok')
+        print("ok")
         return_in_coroutine(2)
 
     future = demo()
     run_until_complete(future)
-    print('result:', future.result())
+    print("result:", future.result())
