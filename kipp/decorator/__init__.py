@@ -188,8 +188,8 @@ def timeout_cache(expires_sec=30, max_size=128):
     r == demo()
 
     """
-    assert expires_sec > 0, f"expires_sec should greater than 0, but got {expires_sec}"
-    assert max_size > 0, f"max_size should greater than 0, but got {max_size}"
+    assert expires_sec > 0, "expires_sec should greater than 0, but got {}".format(expires_sec)
+    assert max_size > 0, "max_size should greater than 0, but got {}".format(max_size)
     state = {}  # {hkey: CacheItem}
 
     def decorator(f):

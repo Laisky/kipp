@@ -25,8 +25,12 @@ from .dfa_filters import DFAFilter
 email_sender = EmailSender()
 
 
-def run_command(command: str, timeout: int) -> str:
+def run_command(command, timeout):
     """Run command and return stdout and strerr
+
+    Args:
+        command (str): command to run
+        timeout (int): seconds
     """
     logger.debug("run command, {}".format(command))
     p = subprocess.Popen(
