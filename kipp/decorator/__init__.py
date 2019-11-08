@@ -35,6 +35,7 @@ def retry(ExceptionToCheck, tries=3, delay=1, backoff=1):
     :param logger: logger to use. If None, print
     :type logger: logging.Logger instance
     """
+
     def deco_retry(f):
         @functools.wraps(f)
         def _wrapper(*args, **kwargs):
@@ -57,12 +58,12 @@ def retry(ExceptionToCheck, tries=3, delay=1, backoff=1):
 def single_instance(pidfilename, logger=None):
     def create_pid(pidfilename):
         current_pid = os.getpid()
-        pidfile = open(pidfilename, 'w')
+        pidfile = open(pidfilename, "w")
         pidfile.write(str(current_pid))
         pidfile.close()
 
     def read_pid(file_path):
-        '''Read pid from a pid file'''
+        """Read pid from a pid file"""
         f = open(file_path)
         pidv = f.read()
         return pidv.strip()
@@ -77,11 +78,13 @@ def single_instance(pidfilename, logger=None):
             return True
 
     def deco_single_instance(func):
-        '''Make sure only one instance of this program with the same parameters runs'''
+        """Make sure only one instance of this program with the same parameters runs"""
         if os.path.exists(pidfilename):
             pidv = read_pid(pidfilename)
             if check_pid(int(pidv)):
-                get_logger()().info("There's already an instance of this program, pid : %s", pidv)
+                get_logger()().info(
+                    "There's already an instance of this program, pid : %s", pidv
+                )
                 sys.exit()
             else:
                 os.remove(pidfilename)
@@ -108,7 +111,7 @@ def debug_wrapper(fn):
         else:
             return r
         finally:
-            get_logger().info('%s cost {:.2f}s'.format(time.time() - start_at), fn)
+            get_logger().info("%s cost {:.2f}s".format(time.time() - start_at), fn)
 
     return wrapper
 
@@ -116,6 +119,7 @@ def debug_wrapper(fn):
 def memo(fn):
     cache = {}
     miss = object()
+
     @functools.wraps(fn)
     def wrapper(*args):
         result = cache.get(args, miss)
@@ -123,12 +127,14 @@ def memo(fn):
             result = fn(*args)
             cache[args] = result
         return result
+
     return wrapper
 
 
 class TimeoutError(Exception):
     def __init__(self, value="Timed Out"):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
 
@@ -137,6 +143,7 @@ def timeout(seconds_before_timeout):
     def decorate(f):
         def handler(signum, frame):
             raise TimeoutError()
+
         def new_f(*args, **kwargs):
             old = signal.signal(signal.SIGALRM, handler)
             signal.alarm(seconds_before_timeout)
@@ -146,16 +153,18 @@ def timeout(seconds_before_timeout):
                 signal.signal(signal.SIGALRM, old)
             signal.alarm(0)
             return result
+
         new_f.func_name = f.func_name
         return new_f
+
     return decorate
 
 
 def calculate_args_hash(*args, **kw):
-    return xxhash.xxh32(str(args)+str(kw)).hexdigest()
+    return xxhash.xxh32(str(args) + str(kw)).hexdigest()
 
 
-CacheItem = namedtuple("item", ['data', 'timeout_at'])
+CacheItem = namedtuple("item", ["data", "timeout_at"])
 
 
 def timeout_cache(expires_sec=30, max_size=128):
@@ -179,9 +188,10 @@ def timeout_cache(expires_sec=30, max_size=128):
     r == demo()
 
     """
-    assert expires_sec > 0, f"expires_sec should greater than 0, but got {expires_sec}"
-    assert max_size > 0, f"max_size should greater than 0, but got {max_size}"
+    assert expires_sec > 0, "expires_sec should greater than 0, but got {}".format(expires_sec)
+    assert max_size > 0, "max_size should greater than 0, but got {}".format(max_size)
     state = {}  # {hkey: CacheItem}
+
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kw):
@@ -193,10 +203,11 @@ def timeout_cache(expires_sec=30, max_size=128):
                             del state[k]
 
                 state[hkey] = CacheItem(
-                    timeout_at=time.time() + expires_sec,
-                    data=f(*args, **kw),
+                    timeout_at=time.time() + expires_sec, data=f(*args, **kw)
                 )
 
             return state[hkey].data
+
         return wrapper
+
     return decorator

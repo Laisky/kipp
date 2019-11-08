@@ -11,7 +11,7 @@ def as_coroutine(func):
     @wraps(func)
     def wrapper(*args, **kw):
         _self = args[0]
-        if getattr(_self, '_executor', None):  # wrap func to future
+        if getattr(_self, "_executor", None):  # wrap func to future
             return _self._executor.submit(func, *args, **kw)
         else:
             return func(*args, **kw)
@@ -32,11 +32,11 @@ class MySQLdbExceptionHandler:
 
     def import_mysqldb(self):
         import MySQLdb
+
         self.__mysqldb_module = MySQLdb
 
 
 class BaseDB(MySQLdbExceptionHandler):
-
     def __init__(self, is_aio=False, executor=None):
         self._db_conn = None
         self._is_aio = is_aio

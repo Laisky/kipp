@@ -54,14 +54,25 @@ Examples:
 from __future__ import unicode_literals
 
 from kipp.libs.aio import (
-    Future, sleep, coroutine,
-    get_event_loop, run_until_complete,
+    Future,
+    sleep,
+    coroutine,
+    get_event_loop,
+    run_until_complete,
     return_in_coroutine,
-    Semaphore, Event, MultiEvent,Condition,
-    Queue, wait)
+    Semaphore,
+    Event,
+    MultiEvent,
+    Condition,
+    Queue,
+    wait,
+)
 from .base import (
-    wrapper, set_aio_n_workers, coroutine2,
+    wrapper,
+    set_aio_n_workers,
+    coroutine2,
     thread_executor as aio_internal_thread_executor,
-    as_completed,)
+    as_completed,
+)
 from .sqlhelper import SqlHelper
 from .http import HTTPSessionClient, get_http_client_session

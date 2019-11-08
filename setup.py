@@ -15,8 +15,8 @@ except ImportError:
 import kipp
 
 
-with open('requirements.txt') as f:
-    install_requires = f.read().strip().split('\n')
+with open("requirements.txt") as f:
+    install_requires = f.read().strip().split("\n")
 
 try:
     import concurrent.futures
@@ -27,15 +27,15 @@ except ImportError:
 
 def update_readme_version(version):
     ver_reg = re.compile(
-        '(https://img\.shields\.io/badge/version-v'
-        '[0-9]+\.[0-9]+(\.[0-9]+)?((dev|rc)[0-9]+)?'
-        '-blue\.svg)'
+        "(https://img\.shields\.io/badge/version-v"
+        "[0-9]+\.[0-9]+(\.[0-9]+)?((dev|rc)[0-9]+)?"
+        "-blue\.svg)"
     )
-    _v = 'https://img.shields.io/badge/version-v{}-blue.svg'.format(version)
-    with open('README.md', 'r') as f:
+    _v = "https://img.shields.io/badge/version-v{}-blue.svg".format(version)
+    with open("README.md", "r") as f:
         src = f.read()
 
-    with open('README.md', 'w') as f:
+    with open("README.md", "w") as f:
         dest = ver_reg.sub(_v, src)
         f.write(dest)
 
@@ -43,37 +43,37 @@ def update_readme_version(version):
 version = kipp.__version__
 update_readme_version(version)
 
-with codecs.open('README.md', 'r', 'utf8') as f:
+with codecs.open("README.md", "r", "utf8") as f:
     long_description = f.read()
 
 
-name = 'kipp'
+name = "kipp"
 packages = []
 package_dir = {name: name}
 for dirname, dirnames, filenames in os.walk(name):
-    if '__init__.py' in filenames:
-        packages.append(dirname.replace('/', '.'))
+    if "__init__.py" in filenames:
+        packages.append(dirname.replace("/", "."))
 
 extras = {
-    'test': ['pytest', 'mock'],
-    'doc': ['sphinx', 'recommonmark', 'sphinxcontrib-napoleon'],
-    'image': ['pillow==3.4.2',],
-    'aio': ['tornado~=4.5',],
+    "test": ["pytest", "mock"],
+    "doc": ["sphinx", "recommonmark", "sphinxcontrib-napoleon"],
+    "image": ["pillow==3.4.2"],
+    "aio": ["tornado~=4.5"],
 }
 all_extras = []
 for _, v in extras.items():
     all_extras.extend(v)
 
-extras['all'] = all_extras
+extras["all"] = all_extras
 
 data_files = [
-    'requirements.txt',
-    'README.md',
-    'CHANGELOG.md',
-    'LICENSE',
-    'Makefile',
-    'package.json',
-    'tox.ini',
+    "requirements.txt",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "Makefile",
+    "package.json",
+    "tox.ini",
 ]
 
 setup(
@@ -85,32 +85,29 @@ setup(
     install_requires=install_requires,
     extras_require=extras,
     data_files=data_files,
-    author='Laisky',
-    author_email='ppcelery@gmail.com',
-    description='Python Utils',
+    author="Laisky",
+    author_email="ppcelery@gmail.com",
+    description="Python Utils",
     long_description=long_description,
-    url='https://github.com/Laisky/kipp',
-    license='MIT License',
+    url="https://github.com/Laisky/kipp",
+    license="MIT License",
     entry_points="""\
         [console_scripts]
         kipp_runner=kipp.runner.__main__:main
     """,
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'Development Status :: 4 - Beta',
-        'Topic :: Software Development :: Libraries',
-        'Environment :: Web Environment',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
+        "Development Status :: 4 - Beta",
+        "Development Status :: 4 - Beta",
+        "Topic :: Software Development :: Libraries",
+        "Environment :: Web Environment",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
-    keywords=[
-        'setup',
-        'distutils',
-        'utils',
-    ]
+    keywords=["setup", "distutils", "utils"],
 )

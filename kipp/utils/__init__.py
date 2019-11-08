@@ -9,6 +9,7 @@ import tempfile
 from functools import wraps
 from collections import namedtuple
 import re
+
 try:
     import fcntl
 except ImportError:
@@ -24,14 +25,36 @@ from .dfa_filters import DFAFilter
 email_sender = EmailSender()
 
 
+def run_command(command, timeout):
+    """Run command and return stdout and strerr
+
+    Args:
+        command (str): command to run
+        timeout (int): seconds
+    """
+    logger.debug("run command, {}".format(command))
+    p = subprocess.Popen(
+        [command], shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    try:
+        outs, errs = p.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        p.kill()
+        outs, errs = p.communicate()
+
+    assert p.returncode == 0, errs
+    return outs
+
+
 def timer(func):
     @wraps(func)
     def wrapper(*args, **kw):
-        logger.info(f"{func.__name__} running...")
+        logger.info("{} running...".format(func.__name__))
         try:
             return func(*args, **kw)
         finally:
-            logger.info(f"{func.__name__} end")
+            logger.info("{} end".format(func.__name__))
+
     return wrapped
 
 
@@ -47,6 +70,7 @@ class IOTA(object):
         iota(2)          # return 4
         iota.latest()    # return 4
     """
+
     def __init__(self, init=-1, step=1):
         init = int(init)
         self.__count = init
@@ -79,7 +103,8 @@ def sleep(secs):
         remains = max(sleep_until - time.time(), 0)
 
 
-VALID_FNAME_REGEX = re.compile('[a-zA-Z0-9]+')
+VALID_FNAME_REGEX = re.compile("[a-zA-Z0-9]+")
+
 
 def generate_validate_fname(val, dirpath=tempfile.gettempdir()):
     """Remove all invalidate characters in file path
@@ -91,7 +116,7 @@ def generate_validate_fname(val, dirpath=tempfile.gettempdir()):
     Returns:
         str: absolute file path
     """
-    fname = '{}.lock'.format('_'.join(VALID_FNAME_REGEX.findall(val)))
+    fname = "{}.lock".format("_".join(VALID_FNAME_REGEX.findall(val)))
     if dirpath:
         fname = os.path.join(dirpath, fname)
 
@@ -124,7 +149,7 @@ def check_is_allow_to_running(lock_fname):
     if not fcntl:
         raise NotImplementedError("not support fcntl in your system")
 
-    fp = open(lock_fname, 'w')
+    fp = open(lock_fname, "w")
     try:
         fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except IOError:

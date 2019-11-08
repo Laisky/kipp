@@ -138,7 +138,7 @@ def runner(command):
         opt.runner_monitor.start()
         get_logger().info('kipp.runner for %s', command)
         opt.set_option('runner_command_start_at', time.time())  # override start_at before real process starting
-        process = subprocess.Popen([command], shell=True, stderr=subprocess.PIPE, preexec_fn=os.setsid)
+        process = subprocess.Popen([command], shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE preexec_fn=os.setsid)
         if opt.timeout:
             r = wait_process_done(process, opt.timeout)
         else:

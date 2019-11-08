@@ -15,11 +15,13 @@ import time
 import logging
 
 
-LOGNAME = 'kipp'  # kipp internal logger name
+LOGNAME = "kipp"  # kipp internal logger name
 
 
 def get_formatter():
-    formatter = logging.Formatter('[%(asctime)sZ - %(levelname)s - %(name)s] - %(message)s')
+    formatter = logging.Formatter(
+        "[%(asctime)s - %(levelname)s - %(pathname)s:%(lineno)d - %(name)s] - %(message)s"
+    )
     formatter.converter = time.gmtime
     return formatter
 
@@ -45,10 +47,10 @@ def setup_logger(logname, debug=False):
     # logger.setLevel(logging.DEBUG)
     # logger.setLevel(log_level)
     stream_handler = get_stream_handler()
-    logging.getLogger('tornado').addHandler(stream_handler)
-    logging.getLogger('tornado').setLevel(logging.ERROR)
-    logging.getLogger('concurrent').addHandler(stream_handler)
-    logging.getLogger('concurrent').setLevel(logging.ERROR)
+    logging.getLogger("tornado").addHandler(stream_handler)
+    logging.getLogger("tornado").setLevel(logging.ERROR)
+    logging.getLogger("concurrent").addHandler(stream_handler)
+    logging.getLogger("concurrent").setLevel(logging.ERROR)
 
     # root_logger = logging.getLogger()
     logger.setLevel(log_level)
@@ -58,20 +60,18 @@ def setup_logger(logname, debug=False):
     return logger
 
 
-_logger = {  # do not change directly
-    'ins': setup_logger(logname=LOGNAME)
-}
+_logger = {"ins": setup_logger(logname=LOGNAME)}  # do not change directly
 
 
 def get_logger():
     """Get kipp internal logger"""
-    return _logger['ins']
+    return _logger["ins"]
 
 
 def get_wrap_handler(target_logger):
     class _WrapperHandler(logging.StreamHandler):
         def emit(self, record):
-            formatter = logging.Formatter('[%(levelname)s:%(name)s] %(message)s')
+            formatter = logging.Formatter("[%(levelname)s:%(name)s] %(message)s")
             target_logger.log(record.levelno, formatter.format(record))
 
     return _WrapperHandler()
@@ -90,5 +90,5 @@ def set_logger(logger):
     """
     handler = get_wrap_handler(logger)
     get_logger().addHandler(handler)
-    for dep_logger_name in ('tornado', 'concurrent'):
+    for dep_logger_name in ("tornado", "concurrent"):
         logging.getLogger(dep_logger_name).addHandler(handler)

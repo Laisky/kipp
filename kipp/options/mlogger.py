@@ -22,6 +22,7 @@ class LazyMLogger:
 
         logger.info(xxx)  # will construct MLogger just before use
     """
+
     _mlogger = None
     _args = _kw = None
 
@@ -38,6 +39,7 @@ class LazyMLogger:
     def setup(self):
         """Setup movoto's MLogger manually"""
         from Utilities.movoto.logger import MLogger
+
         self._mlogger = MLogger().getLogger(*self._args, **self._kw)
 
 
@@ -63,13 +65,23 @@ class ConvertFailureLog:
         Returns:
             logger: the failure logger
         """
-        assert stage in ('normalizer', 'converter', 'keywords'), "stage should be 'normalizer'/'converter'/'keywords'"
+        assert stage in (
+            "normalizer",
+            "converter",
+            "keywords",
+        ), "stage should be 'normalizer'/'converter'/'keywords'"
 
         from Utilities.movoto.logger import MLogger
-        self._failures_logger = MLogger().getLogger('log_null_values_{stage}_{mls_id}'.format(stage=stage, mls_id=mls_id), mls_id)
+
+        self._failures_logger = MLogger().getLogger(
+            "log_null_values_{stage}_{mls_id}".format(stage=stage, mls_id=mls_id),
+            mls_id,
+        )
         return self._failures_logger
 
-    def format_failure_log(self, mls_sysid, mls_number, column_name, column_value, exc_info=None):
+    def format_failure_log(
+        self, mls_sysid, mls_number, column_name, column_value, exc_info=None
+    ):
         """Format arguments to log message
 
         Args:
@@ -82,10 +94,14 @@ class ConvertFailureLog:
         Returns:
             str: message
         """
-        s = 'mls_sysid: {mls_sysid}, mls_number: {mls_number}, column_name: {column_name}, column_value: {column_value}'.format(
-            mls_sysid=mls_sysid, mls_number=mls_number, column_name=column_name, column_value=column_value)
+        s = "mls_sysid: {mls_sysid}, mls_number: {mls_number}, column_name: {column_name}, column_value: {column_value}".format(
+            mls_sysid=mls_sysid,
+            mls_number=mls_number,
+            column_name=column_name,
+            column_value=column_value,
+        )
         if exc_info:
-            s += ', error: '.format(exc_info)
+            s += ", error: ".format(exc_info)
 
         return s
 
@@ -94,9 +110,13 @@ class ConvertFailureLog:
 
         arguments as same as format_failure_log
         """
-        assert self._failures_logger, 'You should invoke ``setup_failure_logger(stage, mls_id)`` first'
+        assert (
+            self._failures_logger
+        ), "You should invoke ``setup_failure_logger(stage, mls_id)`` first"
 
-        if kw.get('exc_info', None):
-            self._failures_logger.error(self.format_failure_log(**kw), exc_info=kw['exc_info'])
+        if kw.get("exc_info", None):
+            self._failures_logger.error(
+                self.format_failure_log(**kw), exc_info=kw["exc_info"]
+            )
         else:
             self._failures_logger.info(self.format_failure_log(**kw))
