@@ -2,6 +2,11 @@
 *CURRENT*
 ---
     
+- 2019-11-08 (Laisky) fix: 27 compatable issue -> [view commit](https://github.com/Laisky/kipp/commit//3f08ebb35cb2d85dcb803abd2cd12ebf39186a97)
+- 2019-11-08 (Laisky) fix: 27 compatable issue -> [view commit](https://github.com/Laisky/kipp/commit//0031daf024b04be3764382f9a745cd95635d7956)
+- 2019-11-08 (Laisky) style: format -> [view commit](https://github.com/Laisky/kipp/commit//09000859a14b69a3702b10a7d14019105bf4435b)
+- 2019-08-22 (Laisky) fix: log contains more info -> [view commit](https://github.com/Laisky/kipp/commit//4c013d3e5a8f7014b078464ab49856e4d250d31e)
+- 2019-08-14 (Laisky) ci: release 0.2.5 -> [view commit](https://github.com/Laisky/kipp/commit//9d0ef176629f18a4fd52bc2ef25e019f7be4317c)
 - 2019-08-14 (Laisky) fix: timeout_cache bug -> [view commit](https://github.com/Laisky/kipp/commit//24132687246bd820111343ece49987f2b98148a6)
 - 2019-08-05 (Laisky) ci: release 0.2.4 -> [view commit](https://github.com/Laisky/kipp/commit//2bc5bda6e7f593f89be662f46fed350c9daabded)
 - 2019-08-05 (Laisky) fix: tornado req -> [view commit](https://github.com/Laisky/kipp/commit//841fc8400d2e6739a7fd0a8781d39da057da698f)
