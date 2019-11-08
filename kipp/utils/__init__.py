@@ -28,7 +28,7 @@ email_sender = EmailSender()
 def run_command(command: str, timeout: int) -> str:
     """Run command and return stdout and strerr
     """
-    logger.debug(f"run command, {command=}")
+    logger.debug("run command, {}".format(command))
     p = subprocess.Popen(
         [command], shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
@@ -45,11 +45,11 @@ def run_command(command: str, timeout: int) -> str:
 def timer(func):
     @wraps(func)
     def wrapper(*args, **kw):
-        logger.info(f"{func.__name__} running...")
+        logger.info("{} running...".format(func.__name__))
         try:
             return func(*args, **kw)
         finally:
-            logger.info(f"{func.__name__} end")
+            logger.info("{} end".format(func.__name__))
 
     return wrapped
 
