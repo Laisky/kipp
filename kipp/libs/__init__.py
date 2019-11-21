@@ -25,9 +25,8 @@ def singleton(cls, *args, **kw):
 
 
 class SingletonMixin:
-
     def __new__(cls, *args, **kw):
-        if not hasattr(cls, '_instance'):
+        if not hasattr(cls, "_instance"):
             orig = super(SingletonMixin, cls)
             cls._instance = orig.__new__(cls, *args, **kw)
         return cls._instance

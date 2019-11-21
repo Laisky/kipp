@@ -32,20 +32,29 @@ from random import randint
 from textwrap import dedent
 
 from kipp.options import options as opt
+
 opt.patch_utilities()
 
 from kipp.aio import Event, run_until_complete
 from kipp.libs.aio import KippAIOTimeoutError
-from kipp.utils import (ThreadPoolExecutor, check_is_allow_to_running,
-                        generate_validate_fname, get_logger, EmailSender, utcnow)
+from kipp.utils import (
+    ThreadPoolExecutor,
+    check_is_allow_to_running,
+    generate_validate_fname,
+    get_logger,
+    EmailSender,
+    utcnow,
+)
 
-from .exceptions import KippRunnerTimeoutException, KippRunnerException, KippRunnerSIGTERMException
+from .exceptions import (
+    KippRunnerTimeoutException,
+    KippRunnerException,
+    KippRunnerSIGTERMException,
+)
 from .models import RunStatsMonitor
 
 
-RECEIVERS = (
-    'lcai@movoto.com',
-)
+RECEIVERS = ("lcai@movoto.com",)
 
 
 def is_need_to_clean_old_records():
@@ -78,23 +87,27 @@ def kill_process(process):
 
 
 def send_alert_email(msg):
-    get_logger().info('try to send runner alert email...')
+    get_logger().info("try to send runner alert email...")
     if opt.debug:
-        receivers = 'lcai@movoto.com'
+        receivers = "lcai@movoto.com"
     else:
-        receivers = ','.join(RECEIVERS)
+        receivers = ",".join(RECEIVERS)
 
-    content = dedent('''
+    content = dedent(
+        """
         time: {dt}
         command: {command}
         error: {err}
-        '''.format(dt=utcnow().strftime('%Y-%m-%dT%H:%M:%S'), command=opt.command, err=msg))
+        """.format(
+            dt=utcnow().strftime("%Y-%m-%dT%H:%M:%S"), command=opt.command, err=msg
+        )
+    )
 
     opt.sender.send_email(
-        mail_from='data@movoto.com',
+        mail_from="data@movoto.com",
         mail_to=receivers,
-        subject='DATA Monitoring: Runner got critical error',
-        content=content
+        subject="DATA Monitoring: Runner got critical error",
+        content=content,
     )
 
 
@@ -111,7 +124,9 @@ def wait_process_done(process, timeout):
         except OSError:
             return f_p.result()
         else:
-            raise KippRunnerTimeoutException('process exceeds timeout {}s'.format(timeout))
+            raise KippRunnerTimeoutException(
+                "process exceeds timeout {}s".format(timeout)
+            )
     else:
         return f_p.result()
     finally:
@@ -119,7 +134,7 @@ def wait_process_done(process, timeout):
 
 
 def handle_signal_quit(signal, frame):
-    err_msg = 'quit by signal {}:\n{}'.format(signal, inspect.getframeinfo(frame))
+    err_msg = "quit by signal {}:\n{}".format(signal, inspect.getframeinfo(frame))
     if signal:
         raise KippRunnerSIGTERMException(err_msg)
 
@@ -130,15 +145,25 @@ def catch_sys_quit_signal():
 
 def runner(command):
     process = err_msg = None
-    opt.set_option('runner_command_start_at', time.time())
+    opt.set_option("runner_command_start_at", time.time())
     try:
-        opt.set_option('runner_monitor', RunStatsMonitor(command=command, args=sys.argv[1: -1]))
+        opt.set_option(
+            "runner_monitor", RunStatsMonitor(command=command, args=sys.argv[1:-1])
+        )
         clean_monitor_logs()
         catch_sys_quit_signal()
         opt.runner_monitor.start()
-        get_logger().info('kipp.runner for %s', command)
-        opt.set_option('runner_command_start_at', time.time())  # override start_at before real process starting
-        process = subprocess.Popen([command], shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE preexec_fn=os.setsid)
+        get_logger().info("kipp.runner for %s", command)
+        opt.set_option(
+            "runner_command_start_at", time.time()
+        )  # override start_at before real process starting
+        process = subprocess.Popen(
+            [command],
+            shell=True,
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            preexec_fn=os.setsid,
+        )
         if opt.timeout:
             r = wait_process_done(process, opt.timeout)
         else:
@@ -157,28 +182,40 @@ def runner(command):
 
         raise
     else:
-        get_logger().info('successed: %s', command)
+        get_logger().info("successed: %s", command)
         opt.runner_monitor.success()
     finally:
         kill_process(process)
 
 
 def setup_settings():
-    opt.set_option('executor', ThreadPoolExecutor(2))
-    opt.set_option('sender', EmailSender(host=opt.SMTP_HOST))
+    opt.set_option("executor", ThreadPoolExecutor(2))
+    opt.set_option("sender", EmailSender(host=opt.SMTP_HOST))
 
 
 def setup_arguments():
-    opt.add_argument('-t', '--timeout', type=int, default=0, help='seconds')
-    opt.add_argument('-ms', '--minimal_running_seconds', type=int, default=30, help='minimal running seconds')
-    opt.add_argument('-l', '--lock', action='store_true', default=False, help='only allow single running')
-    opt.add_argument('--debug', action='store_true', default=False)
-    opt.add_argument('command', nargs=argparse.REMAINDER)
+    opt.add_argument("-t", "--timeout", type=int, default=0, help="seconds")
+    opt.add_argument(
+        "-ms",
+        "--minimal_running_seconds",
+        type=int,
+        default=30,
+        help="minimal running seconds",
+    )
+    opt.add_argument(
+        "-l",
+        "--lock",
+        action="store_true",
+        default=False,
+        help="only allow single running",
+    )
+    opt.add_argument("--debug", action="store_true", default=False)
+    opt.add_argument("command", nargs=argparse.REMAINDER)
     opt.parse_args()
     if not opt.command:
-        raise AttributeError('You should run like ``python -m runner <COMMAND>``')
+        raise AttributeError("You should run like ``python -m runner <COMMAND>``")
 
-    opt.set_option('command', ' '.join(opt.command))
+    opt.set_option("command", " ".join(opt.command))
 
 
 def main():
@@ -189,6 +226,6 @@ def main():
         lock_fname = generate_validate_fname(opt.command)
         fp = check_is_allow_to_running(lock_fname)
         if not fp:
-            raise KippRunnerException('another process is still running')
+            raise KippRunnerException("another process is still running")
 
     runner(opt.command)

@@ -20,8 +20,8 @@ from PIL import Image
 from kipp.decorator import retry
 
 
-IMG_CONTENT_TYPE = 'image/jpeg'
-THUMBNAIL_TYPES = ((u'p', 480), (u'r', 960), (u'l', 1920))
+IMG_CONTENT_TYPE = "image/jpeg"
+THUMBNAIL_TYPES = (("p", 480), ("r", 960), ("l", 1920))
 
 
 def image_resize_and_compress(image_bytesIO, width, quality=75, optimize=True):
@@ -45,10 +45,14 @@ def image_resize_and_compress(image_bytesIO, width, quality=75, optimize=True):
 def compress_image(image_bytesIO, quality=75, optimize=True):
     pil_image = Image.open(image_bytesIO)
     img_data = BytesIO()
-    pil_image.convert("RGB").save(img_data, format='JPEG', quality=quality, optimize=optimize)
+    pil_image.convert("RGB").save(
+        img_data, format="JPEG", quality=quality, optimize=optimize
+    )
     img_data.seek(0)
     image_bytesIO.seek(0)
-    return image_bytesIO if len(img_data.read()) > len(image_bytesIO.read()) else img_data
+    return (
+        image_bytesIO if len(img_data.read()) > len(image_bytesIO.read()) else img_data
+    )
 
 
 def resize_compress_image(image_bytesIO, width, quality=75, optimize=True):
@@ -60,13 +64,20 @@ def resize_compress_image(image_bytesIO, width, quality=75, optimize=True):
     (x, y) = pil_image.size
     new_size = (width, int(width * y / x))
     resized_img_bytesio = BytesIO()
-    pil_image.resize(new_size, Image.ANTIALIAS) \
-        .convert("RGB") \
-        .save(resized_img_bytesio, format='JPEG', quality=quality, optimize=optimize)
+    pil_image.resize(new_size, Image.ANTIALIAS).convert("RGB").save(
+        resized_img_bytesio, format="JPEG", quality=quality, optimize=optimize
+    )
     return resized_img_bytesio
 
 
-def get_thumbnail(input_image_bytesIO, thumbnail_width, thumbnail_height=0, quality_withdraw=5, quality=75, optimize=True):
+def get_thumbnail(
+    input_image_bytesIO,
+    thumbnail_width,
+    thumbnail_height=0,
+    quality_withdraw=5,
+    quality=75,
+    optimize=True,
+):
     """Generate the image thumbnails for one input image
 
     Args:
@@ -86,7 +97,7 @@ def get_thumbnail(input_image_bytesIO, thumbnail_width, thumbnail_height=0, qual
     q = quality
     while 1:
         thumbnail_data = BytesIO()
-        pimg.save(thumbnail_data, format='JPEG', quality=q, optimize=optimize)
+        pimg.save(thumbnail_data, format="JPEG", quality=q, optimize=optimize)
         thumbnail_data.seek(0)
         t_bytes = len(thumbnail_data.read())
 
@@ -109,7 +120,7 @@ def generate_thumbnails(image_bytesIO, img_s3_key, s3):
     """
     pil_image = Image.open(image_bytesIO)
     key_slices = img_s3_key.split(".")
-    copy_key = ''
+    copy_key = ""
     for tname, twidth in THUMBNAIL_TYPES:
         thumnail_s3_key = "{}_{}.{}".format(key_slices[0], tname, key_slices[1])
         if copy_key:
@@ -117,15 +128,17 @@ def generate_thumbnails(image_bytesIO, img_s3_key, s3):
             continue
 
         if pil_image.size[0] <= twidth:
-            thm_data = compress_image(image_bytesIO) # only do compress
+            thm_data = compress_image(image_bytesIO)  # only do compress
             copy_key = thumnail_s3_key
         else:
             thm_data = get_thumbnail(image_bytesIO, twidth)
         thm_data.seek(0)
         resp = s3.m_uploadImage(thm_data, IMG_CONTENT_TYPE, thumnail_s3_key)
         if resp.status != 200:
-            raise IOError('UploadS3Error!! Key[%s] Response[status: %s, reason: %s, msg: %s]'
-                            % (thumnail_s3_key, resp.status, resp.reason, resp.msg))
+            raise IOError(
+                "UploadS3Error!! Key[%s] Response[status: %s, reason: %s, msg: %s]"
+                % (thumnail_s3_key, resp.status, resp.reason, resp.msg)
+            )
 
     flag = 2 ** len(THUMBNAIL_TYPES) - 1
     return flag
@@ -172,6 +185,7 @@ def generate_thumbnails(image_bytesIO, img_s3_key, s3):
 #     flag = 2 ** len(THUMBNAIL_TYPES) - 1
 #     return flag
 
+
 def generate_possible_thumbnails(image_bytesIO, img_s3_key, s3):
     """Generate the image thumbnails for one input image,
         and store the thumbnails in s3.
@@ -193,9 +207,13 @@ def generate_possible_thumbnails(image_bytesIO, img_s3_key, s3):
             thm_data.seek(0)
             resp = s3.m_uploadImage(thm_data, IMG_CONTENT_TYPE, thumnail_s3_key)
             if resp.status != 200:
-                raise IOError('UploadS3Error!! Key[%s] Response[status: %s, reason: %s, msg: %s]'
-                                % (thumnail_s3_key, resp.status, resp.reason, resp.msg))
-            generated_thumbnail_list.append({'width': twidth, 'type': tname, 'height': theight})
+                raise IOError(
+                    "UploadS3Error!! Key[%s] Response[status: %s, reason: %s, msg: %s]"
+                    % (thumnail_s3_key, resp.status, resp.reason, resp.msg)
+                )
+            generated_thumbnail_list.append(
+                {"width": twidth, "type": tname, "height": theight}
+            )
         else:
             break
     return generated_thumbnail_list
@@ -210,36 +228,38 @@ def request_s3_image(url, http_session):
         http_session: you can get it yourself by requests.Session() or give requests.
     """
     res = http_session.get(url)
-    assert res.status_code == 200, 'request_s3_image error'
+    assert res.status_code == 200, "request_s3_image error"
     bytesIO = BytesIO()
     bytesIO.write(res.content)
     bytesIO.seek(0)
     return bytesIO
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import requests as http
-    #url = "http://staging-img.movoto.com.s3.amazonaws.com/p/404/9548575_0_nyyVEa.jpeg"
+
+    # url = "http://staging-img.movoto.com.s3.amazonaws.com/p/404/9548575_0_nyyVEa.jpeg"
     key = "p/104/477149_0_iQyiAu.jpeg"
-#     origin_image_data = request_s3_image("http://staging-img.movoto.com.s3.amazonaws.com/"+key, http)
-#     with open("/tmp/"+key, 'w') as fobj:
-#         fobj.write(origin_image_data.read())
-#     origin_image_data.seek(0)
+    #     origin_image_data = request_s3_image("http://staging-img.movoto.com.s3.amazonaws.com/"+key, http)
+    #     with open("/tmp/"+key, 'w') as fobj:
+    #         fobj.write(origin_image_data.read())
+    #     origin_image_data.seek(0)
     import os
-    origin_image_data = open("/tmp/"+key, 'rb')
+
+    origin_image_data = open("/tmp/" + key, "rb")
 
     img = Image.open(origin_image_data)
     print(img.size)
     origin_image_data.seek(0)
     import time
+
     t0 = time.time()
     thumbnail_img_data = get_thumbnail(origin_image_data, 960)
     print(time.time() - t0)
     save_path = "/tmp/p/104/477149_0_iQyiAu_960.jpeg"
-    with open(save_path, 'w') as fobj:
+    with open(save_path, "w") as fobj:
         fobj.write(thumbnail_img_data.read())
 
-    print("/tmp/"+key, os.path.getsize("/tmp/"+key))
+    print("/tmp/" + key, os.path.getsize("/tmp/" + key))
     print(save_path, os.path.getsize(save_path))
     quit()
-

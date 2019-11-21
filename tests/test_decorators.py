@@ -10,7 +10,6 @@ from kipp.decorator import timeout_cache
 
 
 class UtilsTestCase(BaseTestCase):
-
     def test_timeout_cache(self):
         @timeout_cache(expires_sec=2)
         def demo(n=None):
@@ -23,4 +22,3 @@ class UtilsTestCase(BaseTestCase):
         self.assertNotEqual(demo(1), r)
         time.sleep(2)
         self.assertNotEqual(demo(), r)
-

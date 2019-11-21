@@ -19,9 +19,20 @@ from mock import patch
 from tornado.escape import json_encode
 from tornado.httputil import HTTPHeaders
 
-from kipp.aio import (Future, MultiEvent, as_completed, coroutine, coroutine2,
-                      get_event_loop, return_in_coroutine, run_until_complete,
-                      set_aio_n_workers, sleep, wait, wrapper)
+from kipp.aio import (
+    Future,
+    MultiEvent,
+    as_completed,
+    coroutine,
+    coroutine2,
+    get_event_loop,
+    return_in_coroutine,
+    run_until_complete,
+    set_aio_n_workers,
+    sleep,
+    wait,
+    wrapper,
+)
 from kipp.aio.http import HTTPSessionClient, get_http_client_session
 from kipp.aio.sqlhelper import SqlHelper
 from kipp.exceptions import KippAIOTimeoutError
@@ -33,15 +44,11 @@ from .base import BaseTestCase
 
 class FakeHTTPResponse(object):
     def __init__(self):
-        self.headers = HTTPHeaders({
-            'Cookie': 'a=2;b=3',
-            'Set-Cookie': 'c=3',
-        })
-        self.body = json_encode({'body': 'json-body'})
+        self.headers = HTTPHeaders({"Cookie": "a=2;b=3", "Set-Cookie": "c=3",})
+        self.body = json_encode({"body": "json-body"})
 
 
 class HTTPSessionClientTestCase(BaseTestCase):
-
     def setUp(self):
         resp = FakeHTTPResponse()
         future = Future()
@@ -57,7 +64,7 @@ class HTTPSessionClientTestCase(BaseTestCase):
         def _response(*args, **kw):
             return self._resp_future
 
-        with patch('tornado.httpclient.AsyncHTTPClient.fetch') as m:
+        with patch("tornado.httpclient.AsyncHTTPClient.fetch") as m:
             with get_http_client_session() as client:
                 self.client = client
                 m.side_effect = _response
@@ -65,41 +72,41 @@ class HTTPSessionClientTestCase(BaseTestCase):
 
     def test_json(self):
         with self.get_http_patch() as m:
-            f = self.client.post('abc', json={'request': 'json'})
+            f = self.client.post("abc", json={"request": "json"})
 
         run_until_complete(f)
         resp = f.result()
-        self.assertEqual(json_encode({'request': 'json'}), m.call_args[1]['body'])
-        self.assertDictEqual({'body': 'json-body'}, resp.json())
-
+        self.assertEqual(json_encode({"request": "json"}), m.call_args[1]["body"])
+        self.assertDictEqual({"body": "json-body"}, resp.json())
 
     def test_cookies(self):
         with self.get_http_patch() as m:
-            f = self.client.fetch('abc', cookies={'cc': 'ccc'})
+            f = self.client.fetch("abc", cookies={"cc": "ccc"})
 
-        self.assertEqual('cc=ccc', m.call_args[1]['headers']['Cookie'])
+        self.assertEqual("cc=ccc", m.call_args[1]["headers"]["Cookie"])
         run_until_complete(f)
         resp = f.result()
-        self.assertDictEqual({'c': '3'}, resp.cookies)
+        self.assertDictEqual({"c": "3"}, resp.cookies)
 
     def test_rest(self):
 
-        for method in ('get', 'post', 'patch', 'head', 'delete'):
+        for method in ("get", "post", "patch", "head", "delete"):
             with self.get_http_patch() as m:
-                f = getattr(self.client, method)('abc')
+                f = getattr(self.client, method)("abc")
 
-            self.assertEqual(m.call_args[0], ('abc',))
-            self.assertPartInDict({'headers': {'Connection': 'keep-alive'}}, m.call_args[1])
+            self.assertEqual(m.call_args[0], ("abc",))
+            self.assertPartInDict(
+                {"headers": {"Connection": "keep-alive"}}, m.call_args[1]
+            )
             run_until_complete(f)
             self.assertEqual(f.result().response, self._resp)
 
 
 class AioTestCase(BaseTestCase):
-
     @coroutine
     def _simple_task(self):
         yield sleep(0.5)
-        return_in_coroutine('ok')
+        return_in_coroutine("ok")
 
     @coroutine
     def _task_for_sleep(self, sec):
@@ -122,17 +129,18 @@ class AioTestCase(BaseTestCase):
         self.assertFalse(future.done())
         run_until_complete(future)
         self.assertTrue(future.done())
-        self.assertEqual(future.result(), 'ok')
+        self.assertEqual(future.result(), "ok")
 
     def test_wait(self):
         futures = [self._simple_task() for _ in range(5)]
         self.assertFalse(any([f.done() for f in futures]))
         gathered = wait(futures)
         run_until_complete(gathered)
-        self.assertTrue([r=='ok' for r in gathered.result()])
+        self.assertTrue([r == "ok" for r in gathered.result()])
 
     def test_set_aio_n_workers(self):
         from kipp.aio.base import thread_executor
+
         set_aio_n_workers(6)
         self.assertEqual(thread_executor._n_workers, 6)
         thread_executor.submit(self._simple_task)
@@ -150,7 +158,7 @@ class AioTestCase(BaseTestCase):
 
         self.assertRaises(KippException, MultiEvent, 0)
         self.assertRaises(KippException, MultiEvent, -1)
-        self.assertRaises(KippException, MultiEvent, 'a')
+        self.assertRaises(KippException, MultiEvent, "a")
 
     def test_future_thread_safe(self):
         def demo():
@@ -192,7 +200,7 @@ class AioTestCase(BaseTestCase):
         expect = 0.5
         for futu in as_completed(futures):
             self.assertAlmostEqual(futu.result(), expect)
-            expect += .1
+            expect += 0.1
 
     def test_as_completed_timeout(self):
         try:
@@ -206,60 +214,59 @@ class AioTestCase(BaseTestCase):
 
 
 # @skipIf(not PY2, 'only support PY2 now')
-@skipIf(True, 'do not complete')
+@skipIf(True, "do not complete")
 class AioSqlHelperTestCase(BaseTestCase):
-
     def setUp(self):
         if PY2:
-            sys.path.insert(0, '/Users/laisky/repo/movoto')
+            sys.path.insert(0, "/Users/laisky/repo/movoto")
             try:
                 from Utilities.movoto import settings
             except ImportError:
-                get_logger().error('Can not import utilities')
+                get_logger().error("Can not import utilities")
                 raise
 
     def tearDown(self):
         sys.path.pop(0)
         for m in list(sys.modules.keys()):
-            if m =='Utilities' or m.startswith('Utilities.'):
+            if m == "Utilities" or m.startswith("Utilities."):
                 del sys.modules[m]
 
     def test_init_sqlhelper(self):
         @coroutine
         @wrapper
         def _test():
-            sqlhelper = SqlHelper('movoto')
-            return_in_coroutine('ok')
+            sqlhelper = SqlHelper("movoto")
+            return_in_coroutine("ok")
 
         future = _test()
         run_until_complete(future)
-        self.assertEqual(future.result(), 'ok')
+        self.assertEqual(future.result(), "ok")
 
     def test_getOneBySql(self):
         @coroutine
         @wrapper
         def _test():
-            sqlhelper = SqlHelper('movoto')
-            r = yield sqlhelper.get_one_by_sql('show databases;')
+            sqlhelper = SqlHelper("movoto")
+            r = yield sqlhelper.get_one_by_sql("show databases;")
             return_in_coroutine(r)
 
         future = _test()
         run_until_complete(future)
         self.assertIsNone(future.exception())
-        self.assertEqual(future.result()[0], 'information_schema')
+        self.assertEqual(future.result()[0], "information_schema")
 
     def test_getAllBySql(self):
         @coroutine
         @wrapper
         def _test():
-            sqlhelper = SqlHelper('movoto')
-            r = yield sqlhelper.get_all_by_sql('show databases;')
+            sqlhelper = SqlHelper("movoto")
+            r = yield sqlhelper.get_all_by_sql("show databases;")
             return_in_coroutine(r)
 
         future = _test()
         run_until_complete(future)
         self.assertIsNone(future.exception())
-        self.assertEqual(future.result()[0][0], 'information_schema')
+        self.assertEqual(future.result()[0][0], "information_schema")
 
     def test_wrapper(self):
         @coroutine

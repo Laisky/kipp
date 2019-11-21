@@ -11,7 +11,6 @@ except ImportError:
 
 
 class BaseTestCase(TestCase):
-
     def assertPartInDict(self, dict1, dict2):
         for key, val in dict1.items():
             self.assertIn(key, dict2)

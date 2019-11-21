@@ -151,11 +151,10 @@ class EmailSender(object):
             )
             return True
         except Exception:
-            self.get_logger().error(
+            self.get_logger().exception(
                 "fail to send email to {} with subject {} for error:".format(
                     mail_to, subject
-                ),
-                exc_info=True,
+                )
             )
             return False
 
@@ -204,4 +203,3 @@ if __name__ == "__main__":
         content="fake-content\n\nline 2",
         mail_from="kipp@movoto.com",
     )
-
