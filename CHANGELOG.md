@@ -2,6 +2,9 @@
 *CURRENT*
 ---
     
+- 2019-11-21 (Laisky) ci: release 0.2.7 -> [view commit](https://github.com/Laisky/kipp/commit//5c377ccac9b38ffdcaef6b88f9eedd75a5bf9efa)
+- 2019-11-21 (Laisky) style: format -> [view commit](https://github.com/Laisky/kipp/commit//67d8a3cb4a4c1675cdc3c26a05ccfa1afd3c00a9)
+- 2019-11-08 (Laisky) ci: release 0.2.6 -> [view commit](https://github.com/Laisky/kipp/commit//76446528d2cb2cd307d74ca2a0535bd772f4d9e5)
 - 2019-11-08 (Laisky) fix: 27 compatable issue -> [view commit](https://github.com/Laisky/kipp/commit//3f08ebb35cb2d85dcb803abd2cd12ebf39186a97)
 - 2019-11-08 (Laisky) fix: 27 compatable issue -> [view commit](https://github.com/Laisky/kipp/commit//0031daf024b04be3764382f9a745cd95635d7956)
 - 2019-11-08 (Laisky) style: format -> [view commit](https://github.com/Laisky/kipp/commit//09000859a14b69a3702b10a7d14019105bf4435b)
