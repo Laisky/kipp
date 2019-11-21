@@ -198,4 +198,3 @@ class HTTPSessionClient:
     def _parse_cookies_to_str(self, cookies):
         """Parse dict of cookies into string"""
         return ";".join(["{}={}".format(n, v) for n, v in cookies.items()])
-

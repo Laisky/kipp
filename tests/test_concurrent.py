@@ -10,7 +10,6 @@ from kipp.aio import run_until_complete, wait
 
 
 class ThreadPoolExecutorTestCase(TestCase):
-
     def _fake_task(self):
         return 2
 
@@ -89,7 +88,7 @@ class ThreadPoolExecutorTestCase(TestCase):
         start_time = time.time()
         run_until_complete(future_slow)
         end_time = time.time()
-        self.assertLess(end_time-start_time, 2)
+        self.assertLess(end_time - start_time, 2)
         self.assertTrue(future_slow.done())
         self.assertFalse(future_very_slow.done())
         self.assertEqual(future_slow.result(), 3)
@@ -121,4 +120,3 @@ class ThreadPoolExecutorTestCase(TestCase):
         obj.is_done = True
         thread_pool.shutdown()  # wait to finish
         self.assertTrue(future.done())
-

@@ -19,8 +19,9 @@
 #
 import os
 import sys
+
 # sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath(".."))
 
 from recommonmark.parser import CommonMarkParser
 
@@ -35,14 +36,14 @@ from recommonmark.parser import CommonMarkParser
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.doctest',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.imgmath',
-    'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.autodoc',
-    'sphinxcontrib.napoleon',
+    "sphinx.ext.doctest",
+    "sphinx.ext.todo",
+    "sphinx.ext.coverage",
+    "sphinx.ext.imgmath",
+    "sphinx.ext.ifconfig",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.autodoc",
+    "sphinxcontrib.napoleon",
 ]
 
 # Napoleon settings
@@ -60,14 +61,14 @@ napoleon_use_rtype = True
 napoleon_use_keyword = True
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = ['.rst', '.md']
+source_suffix = [".rst", ".md"]
 parsers = {
-    '.md': CommonMarkParser,
+    ".md": CommonMarkParser,
 }
 
 # The encoding of source files.
@@ -75,18 +76,19 @@ parsers = {
 # source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = 'Kipp'
-copyright = '2017, Movoto'
-author = 'Movoto'
+project = "Kipp"
+copyright = "2017, Movoto"
+author = "Movoto"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
 from kipp import __version__
+
 # The short X.Y version.
 version = __version__
 # The full version, including alpha/beta/rc tags.
@@ -133,7 +135,7 @@ exclude_patterns = []
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
@@ -189,7 +191,7 @@ html_theme = "classic"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -269,7 +271,7 @@ html_static_path = ['_static']
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Kippdoc'
+htmlhelp_basename = "Kippdoc"
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -277,15 +279,12 @@ latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
-
     # The font size ('10pt', '11pt' or '12pt').
     #
     # 'pointsize': '10pt',
-
     # Additional stuff for the LaTeX preamble.
     #
     # 'preamble': '',
-
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
@@ -295,8 +294,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Kipp.tex', 'Kipp Documentation',
-     'Movoto', 'manual'),
+    (master_doc, "Kipp.tex", "Kipp Documentation", "Movoto", "manual"),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -336,10 +334,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'kipp', 'Kipp Documentation',
-     [author], 1)
-]
+man_pages = [(master_doc, "kipp", "Kipp Documentation", [author], 1)]
 
 # If true, show URL addresses after external links.
 #
@@ -352,9 +347,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Kipp', 'Kipp Documentation',
-     author, 'Kipp', 'One line description of project.',
-     'Miscellaneous'),
+    (
+        master_doc,
+        "Kipp",
+        "Kipp Documentation",
+        author,
+        "Kipp",
+        "One line description of project.",
+        "Miscellaneous",
+    ),
 ]
 
 # Documents to append as an appendix to all manuals.

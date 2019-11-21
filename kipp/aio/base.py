@@ -90,7 +90,7 @@ def coroutine2(func):
             # should not raise StopIteration in a generator
             return
         except Exception as err:
-            get_logger().error("kipp.aio.coroutine2 encounter error:", exc_info=True)
+            get_logger().exception("kipp.aio.coroutine2 got unknown error")
             raise
 
     return _wrap
@@ -111,14 +111,31 @@ def wrapper(func):
 
     @wraps(func)
     def _wrap(*args, **kw):
-        get_logger().error("`wrapper` is deprecated! Please use `coroutine2` instead.")
+        get_logger().error("`wrapper` is deprecated! Please use `coroutine2` instead")
         try:
             g = func(*args, **kw)
             return g
         except (Return, StopIteration):
             raise
         except Exception as err:
-            get_logger().error("kipp.aio.wrapper encouter error: ", exc_info=True)
+            get_logger().exception("kipp.aio.wrapper got unknown error")
             raise err
 
     return _wrap
+
+
+def async_timer(func):
+    """log async task running time"""
+
+    @wraps(func)
+    async def wrapper(*args, **kw):
+        get_logger().info("{} running...".format(func.__name__))
+        start_at = time()
+        try:
+            return await func(*args, **kw)
+        finally:
+            get_logger().info(
+                "{} end, cost {:.2f}s".format(func.__name__, time() - start_at)
+            )
+
+    return wrapper
