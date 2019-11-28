@@ -6,7 +6,7 @@ import os
 import time
 
 from .base import BaseTestCase
-from kipp.decorator import timeout_cache
+from kipp.decorator import timeout_cache, timer
 
 
 class UtilsTestCase(BaseTestCase):
@@ -22,3 +22,10 @@ class UtilsTestCase(BaseTestCase):
         self.assertNotEqual(demo(1), r)
         time.sleep(2)
         self.assertNotEqual(demo(), r)
+
+    def test_timer(self):
+        @timer
+        def demo():
+            time.sleep(2)
+
+        demo()

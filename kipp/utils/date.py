@@ -30,8 +30,8 @@ UTC = pytz.timezone("utc")
 CST = pytz.timezone("Asia/Shanghai")
 
 _SPECIAL_DTSTR_REGEX_MAP = {
-    re.compile("^(\d{4})$"): "%H%M",
-    re.compile("^(\d{2}:\d{2}) noon$", flags=re.I): "%H:%M",
+    re.compile(r"^(\d{4})$"): "%H%M",
+    re.compile(r"^(\d{2}:\d{2}) noon$", flags=re.I): "%H:%M",
 }
 
 
@@ -44,7 +44,7 @@ def _parse_special_dtstr(dtstr):
             return UTC.localize(datetime.datetime.strptime(_dtstr, dt_fmt))
 
 
-_IGNORE_TZ_REGEX = re.compile("[+\-][0-9:]{1,5}$")
+_IGNORE_TZ_REGEX = re.compile(r"[+\-][0-9:]{1,5}$")
 
 
 def _extrace_dtstr_exclude_tz(dtstr):

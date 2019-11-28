@@ -4,7 +4,11 @@
 from __future__ import unicode_literals
 import functools
 import traceback
-import time
+
+try:
+    from time import monotonic as time
+except ImportError:
+    from time import time
 import os
 import sys
 import datetime
@@ -99,21 +103,35 @@ def single_instance(pidfilename, logger=None):
     return deco_single_instance
 
 
-def debug_wrapper(fn):
+def timer(fn):
+    """decorator to log running time
+
+    Examples:
+    ::
+        from kipp.decorator import timer
+
+        @timer
+        def demo():
+            time.sleep(10)
+
+    """
     @functools.wraps(fn)
     def wrapper(*args, **kw):
         try:
-            start_at = time.time()
+            start_at = time()
             r = fn(*args, **kw)
         except Exception as err:
-            get_logger().exception(err)
+            get_logger().exception("run {}".format(fn.__name__))
             raise
         else:
             return r
         finally:
-            get_logger().info("%s cost {:.2f}s".format(time.time() - start_at), fn)
+            get_logger().info("{} cost {:.2f}s".format(fn.__name__, time() - start_at))
 
     return wrapper
+
+
+debug_wrapper = timer # compatable
 
 
 def memo(fn):
@@ -198,14 +216,14 @@ def timeout_cache(expires_sec=30, max_size=128):
         @functools.wraps(f)
         def wrapper(*args, **kw):
             hkey = calculate_args_hash(*args, **kw)
-            if hkey not in state or state[hkey].timeout_at < time.time():
+            if hkey not in state or state[hkey].timeout_at < time():
                 if len(state) > max_size:  # remove expired keys
                     for k in list(state.keys()):
-                        if state[k].timeout_at > time.time():
+                        if state[k].timeout_at > time():
                             del state[k]
 
                 state[hkey] = CacheItem(
-                    timeout_at=time.time() + expires_sec, data=f(*args, **kw)
+                    timeout_at=time() + expires_sec, data=f(*args, **kw)
                 )
 
             return state[hkey].data
