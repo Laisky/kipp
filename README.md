@@ -1,4 +1,6 @@
-# Kipp
+# Kipp3
+
+Only support Python 3.8+
 
 | ![kipp3](https://s3.laisky.com/uploads/2019/06/nolan-comic-ft.jpg)
 | :---------------------------------------------------------------:
