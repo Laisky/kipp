@@ -2,6 +2,7 @@
 *CURRENT*
 ---
     
+- 2019-12-17 (Laisky) fix: rename -> [view commit](https://github.com/Laisky/kipp/commit//dff31085185d8516f7c2a61e12d438813637661e)
 - 2019-12-17 (Laisky) docs: update readme -> [view commit](https://github.com/Laisky/kipp/commit//c933c12e9c8aca20bf327e7daac8bc7ea0c79cd4)
 - 2019-12-17 (Laisky) ci: release kipp3 -> [view commit](https://github.com/Laisky/kipp/commit//43cd0dc9a39f2134261a06b8c9effc89727f9d36)
 - 2019-11-28 (Laisky) fix: monotic time -> [view commit](https://github.com/Laisky/kipp/commit//7b0d0a0121f06fb7f9c0fea386ad30e92c6fe2d2)

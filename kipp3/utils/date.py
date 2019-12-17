@@ -20,7 +20,6 @@ Usage
 from __future__ import unicode_literals
 import re
 import datetime
-from future.utils import iteritems
 
 import pytz
 import maya
@@ -37,7 +36,7 @@ _SPECIAL_DTSTR_REGEX_MAP = {
 
 def _parse_special_dtstr(dtstr):
     """Parse MLSes weird datetime string formats"""
-    for dt_regx, dt_fmt in iteritems(_SPECIAL_DTSTR_REGEX_MAP):
+    for dt_regx, dt_fmt in _SPECIAL_DTSTR_REGEX_MAP.items():
         m = dt_regx.match(dtstr)
         if m:
             _dtstr = m.groups()[0]
