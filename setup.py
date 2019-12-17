@@ -18,12 +18,6 @@ import kipp
 with open("requirements.txt") as f:
     install_requires = f.read().strip().split("\n")
 
-try:
-    import concurrent.futures
-except ImportError:
-    # py2 `concurrent.futures`
-    install_requires.extend(["futures", "tornado~=4.5"])
-
 
 def update_readme_version(version):
     ver_reg = re.compile(
@@ -47,7 +41,7 @@ with codecs.open("README.md", "r", "utf8") as f:
     long_description = f.read()
 
 
-name = "kipp"
+name = "kipp3"
 packages = []
 package_dir = {name: name}
 for dirname, dirnames, filenames in os.walk(name):
@@ -58,7 +52,6 @@ extras = {
     "test": ["pytest", "mock"],
     "doc": ["sphinx", "recommonmark", "sphinxcontrib-napoleon"],
     "image": ["pillow==3.4.2"],
-    "aio": ["tornado~=4.5"],
 }
 all_extras = []
 for _, v in extras.items():
@@ -104,7 +97,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",

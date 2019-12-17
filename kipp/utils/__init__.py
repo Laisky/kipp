@@ -17,7 +17,6 @@ except ImportError:
 
 from .logger import setup_logger, get_logger
 from .date import UTC, CST, parse_dtstr, utcnow, cstnow
-from .concurrents import Future, ThreadPoolExecutor, ProcessPoolExecutor
 from .mailsender import EmailSender
 from .dfa_filters import DFAFilter
 

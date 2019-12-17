@@ -2,6 +2,7 @@
 *CURRENT*
 ---
     
+- 2019-11-28 (Laisky) fix: monotic time -> [view commit](https://github.com/Laisky/kipp/commit//7b0d0a0121f06fb7f9c0fea386ad30e92c6fe2d2)
 - 2019-11-21 (Laisky) ci: release 0.2.7 -> [view commit](https://github.com/Laisky/kipp/commit//ef8608d3517dfc0ee1ae217f3aebf54e4c983837)
 - 2019-11-21 (Laisky) style: format -> [view commit](https://github.com/Laisky/kipp/commit//67d8a3cb4a4c1675cdc3c26a05ccfa1afd3c00a9)
 - 2019-11-08 (Laisky) ci: release 0.2.6 -> [view commit](https://github.com/Laisky/kipp/commit//76446528d2cb2cd307d74ca2a0535bd772f4d9e5)

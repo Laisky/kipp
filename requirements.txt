@@ -7,15 +7,8 @@ ruamel.yaml~=0.14
 # humanize~=0.5
 # six~=1.10
 
-# 2 & 3
-# http://python-future.org/compatible_idioms.html
-future<1
-
 # datetime
 maya~=0.6
 # pytz~=2016.10
-
-# aio & libs
-tornado~=4.5
 
 xxhash~=1.3
