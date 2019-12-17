@@ -8,7 +8,7 @@ Email Sender
 
 Usage
 ::
-    from kipp.utils import EmailSender
+    from kipp3.utils import EmailSender
 
     sender = EmailSender(opt.SMTP_HOST)  # SMTP_HOST is different between NOVA and PRD
     receivers = ','.join([xxx, xxx, xxx])

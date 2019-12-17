@@ -17,7 +17,7 @@ from io import BytesIO
 
 from PIL import Image
 
-from kipp.decorator import retry
+from kipp3.decorator import retry
 
 
 IMG_CONTENT_TYPE = "image/jpeg"

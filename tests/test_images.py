@@ -12,7 +12,7 @@ from collections import namedtuple
 from PIL import Image
 from mock import MagicMock
 
-from kipp.images import (
+from kipp3.images import (
     compress_image,
     image_resize_and_compress,
     resize_compress_image,

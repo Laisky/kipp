@@ -31,13 +31,13 @@ from datetime import timedelta
 from random import randint
 from textwrap import dedent
 
-from kipp.options import options as opt
+from kipp3.options import options as opt
 
 opt.patch_utilities()
 
-from kipp.aio import Event, run_until_complete
-from kipp.libs.aio import KippAIOTimeoutError
-from kipp.utils import (
+from kipp3.aio import Event, run_until_complete
+from kipp3.libs.aio import KippAIOTimeoutError
+from kipp3.utils import (
     ThreadPoolExecutor,
     check_is_allow_to_running,
     generate_validate_fname,

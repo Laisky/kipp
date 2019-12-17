@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-from kipp.utils import utcnow, get_logger
+from kipp3.utils import utcnow, get_logger
 
 
 RUNSTATSMONITOR_COLLECTION_NAME = "run_stats_monitor"

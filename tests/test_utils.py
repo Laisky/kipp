@@ -6,7 +6,7 @@ import os
 import time
 
 from .base import BaseTestCase
-from kipp.utils import (
+from kipp3.utils import (
     IOTA,
     generate_validate_fname,
     sleep,

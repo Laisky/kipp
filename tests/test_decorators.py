@@ -6,7 +6,7 @@ import os
 import time
 
 from .base import BaseTestCase
-from kipp.decorator import timeout_cache, timer
+from kipp3.decorator import timeout_cache, timer
 
 
 class UtilsTestCase(BaseTestCase):

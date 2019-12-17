@@ -13,8 +13,8 @@ try:
 except ImportError:
     from mock import patch
 
-from kipp.options import BaseOptions
-from kipp.exceptions import OptionKeyTypeConflictError
+from kipp3.options import BaseOptions
+from kipp3.exceptions import OptionKeyTypeConflictError
 
 
 class OptionsTestCase(TestCase):
@@ -40,7 +40,7 @@ class OptionsTestCase(TestCase):
         sys.modules["Utilities"] = MovotoMock()
         sys.modules["Utilities.movoto"] = MovotoMock()
 
-        from kipp.options import options as opt
+        from kipp3.options import options as opt
 
         self.opt = opt
         self.origin_modules = {}
@@ -71,7 +71,7 @@ class OptionsTestCase(TestCase):
         sys.modules.update(self.origin_modules)
 
     def test_singleton(self):
-        from kipp.options import options as opt
+        from kipp3.options import options as opt
 
         self.assertIs(opt, self.opt)
 

@@ -6,7 +6,7 @@ import os
 import sys
 from unittest import skipIf
 
-from kipp.options import options as opt
+from kipp3.options import options as opt
 from .base import BaseTestCase, patch
 
 
@@ -44,7 +44,7 @@ class RunnerTestCase(BaseTestCase):
             ):
                 self.origin_modules.update({m: i})
 
-        from kipp.runner.runner import runner, setup_settings
+        from kipp3.runner.runner import runner, setup_settings
 
         setup_settings()
         self.runner = runner

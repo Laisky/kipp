@@ -138,7 +138,7 @@ def check_is_allow_to_running(lock_fname):
     ::
         import os
 
-        from kipp.utils import check_is_allow_to_running
+        from kipp3.utils import check_is_allow_to_running
 
         is_allow_running = check_is_allow_to_running('/mnt/log/ramjet-driver.lock')
         if not is_allow_running:

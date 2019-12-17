@@ -7,7 +7,7 @@ from unittest import TestCase
 
 import pytz
 
-from kipp.utils import date
+from kipp3.utils import date
 
 
 UTC = pytz.timezone("utc")

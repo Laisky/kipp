@@ -17,7 +17,7 @@ from collections import namedtuple, defaultdict
 
 import xxhash
 
-from kipp.utils import get_logger
+from kipp3.utils import get_logger
 
 
 def retry(ExceptionToCheck, tries=3, delay=1, backoff=1):
@@ -108,7 +108,7 @@ def timer(fn):
 
     Examples:
     ::
-        from kipp.decorator import timer
+        from kipp3.decorator import timer
 
         @timer
         def demo():
@@ -195,7 +195,7 @@ def timeout_cache(expires_sec=30, max_size=128):
     ::
     import time
 
-    from kipp.utils import timeout_cache
+    from kipp3.utils import timeout_cache
 
     @timeout_cache(expires_sec=2)
     def demo():

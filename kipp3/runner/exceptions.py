@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-from kipp.libs import KippException
+from kipp3.libs import KippException
 
 
 class KippRunnerException(KippException):

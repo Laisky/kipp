@@ -19,8 +19,8 @@ import importlib
 
 # from imp import load_source
 
-from kipp.libs import SingletonMixin
-from kipp.utils import get_logger
+from kipp3.libs import SingletonMixin
+from kipp3.utils import get_logger
 
 # from .mlogger import LazyMLogger, ConvertFailureLog
 from .arguments import ArgparseMixin
@@ -239,7 +239,7 @@ class Options(BaseOptions, ArgparseMixin, SingletonMixin):
 
         General usage::
 
-            from kipp.options import options as opt
+            from kipp3.options import options as opt
 
             # both ok
             opt.get_option('debug')
@@ -250,7 +250,7 @@ class Options(BaseOptions, ArgparseMixin, SingletonMixin):
 
         Setup with argparse::
 
-            from kipp.options import options as opt
+            from kipp3.options import options as opt
 
             # get args from argparse
             parser = argparse.ArgumentParser()
@@ -264,7 +264,7 @@ class Options(BaseOptions, ArgparseMixin, SingletonMixin):
 
         Patch Utilities only::
 
-            from kipp.options import options as opt
+            from kipp3.options import options as opt
 
             # should patch before import Utilities
             opt.patch_utilities()
@@ -273,7 +273,7 @@ class Options(BaseOptions, ArgparseMixin, SingletonMixin):
 
         Setup your own attribute::
 
-            from kipp.options import options as opt
+            from kipp3.options import options as opt
 
             # 321
             # assume init value is 321

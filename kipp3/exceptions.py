@@ -21,5 +21,5 @@ KippException
 
 from __future__ import unicode_literals
 
-from kipp.libs.exceptions import KippAIOException, KippAIOTimeoutError, KippException
-from kipp.options import KippOptionsException, OptionKeyTypeConflictError
+from kipp3.libs.exceptions import KippAIOException, KippAIOTimeoutError, KippException
+from kipp3.options import KippOptionsException, OptionKeyTypeConflictError

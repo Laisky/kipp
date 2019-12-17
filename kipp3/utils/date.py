@@ -10,10 +10,10 @@ Usage
 ::
 
     # import timezone constants
-    from kipp.utils import UTC, CST
+    from kipp3.utils import UTC, CST
 
     # import datetime functions
-    from kipp.utils import parse_dtstr, utcnow, cstnow
+    from kipp3.utils import parse_dtstr, utcnow, cstnow
 
 """
 
@@ -75,7 +75,7 @@ def parse_dtstr(
 
     Examples:
     ::
-        from kipp.utils import parse_dtstr
+        from kipp3.utils import parse_dtstr
 
         dtstr = '2017/1/1 13:00 +08:00'
         dt = parse_dtstr(dtstr)

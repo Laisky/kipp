@@ -7,7 +7,7 @@ from textwrap import dedent
 
 from mock import patch, MagicMock
 
-from kipp.utils import EmailSender
+from kipp3.utils import EmailSender
 
 
 class EmailSenderTestCase(TestCase):

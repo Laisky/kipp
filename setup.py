@@ -12,7 +12,7 @@ except ImportError:
     setuptools = None
     from distutils.core import setup
 
-import kipp
+import kipp3
 
 
 with open("requirements.txt") as f:
@@ -34,7 +34,7 @@ def update_readme_version(version):
         f.write(dest)
 
 
-version = kipp.__version__
+version = kipp3.__version__
 update_readme_version(version)
 
 with codecs.open("README.md", "r", "utf8") as f:
@@ -86,7 +86,7 @@ setup(
     license="MIT License",
     entry_points="""\
         [console_scripts]
-        kipp_runner=kipp.runner.__main__:main
+        kipp3_runner=kipp3.runner.__main__:main
     """,
     classifiers=[
         "Development Status :: 4 - Beta",

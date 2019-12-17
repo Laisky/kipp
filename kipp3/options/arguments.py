@@ -11,7 +11,7 @@ class ArgparseMixin:
 
     Usage
     ::
-        from kipp.options import options as opt
+        from kipp3.options import options as opt
 
         # set command argument
         opt.add_argument('--test', type=str)

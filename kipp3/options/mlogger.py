@@ -14,7 +14,7 @@ class LazyMLogger:
     Initialize
     ::
 
-        from kipp.options import options as opt
+        from kipp3.options import options as opt
 
         logger = opt.get_mlogger()  # get logger without init
 
