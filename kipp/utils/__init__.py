@@ -9,6 +9,7 @@ import tempfile
 from functools import wraps
 from collections import namedtuple
 import re
+import subprocess
 
 try:
     import fcntl
@@ -55,7 +56,7 @@ def timer(func):
         finally:
             logger.info("{} end".format(func.__name__))
 
-    return wrapped
+    return wrapper
 
 
 class IOTA(object):
