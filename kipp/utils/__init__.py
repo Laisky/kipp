@@ -23,6 +23,7 @@ from .mailsender import EmailSender
 from .dfa_filters import DFAFilter
 
 
+logger = get_logger()
 email_sender = EmailSender()
 
 
