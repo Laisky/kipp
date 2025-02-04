@@ -57,6 +57,7 @@ def setup_logger(logname, debug=False):
     if not logger.handlers:
         logger.addHandler(stream_handler)
 
+    logger.propagate = False
     return logger
 
 
