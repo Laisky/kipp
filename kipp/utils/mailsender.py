@@ -28,6 +28,10 @@ import smtplib
 from textwrap import dedent
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+try:
+    from html import escape
+except ImportError:
+    from cgi import escape
 
 from .logger import get_logger as get_kipp_logger
 
@@ -84,8 +88,10 @@ class EmailSender(object):
     #     self._mail_from = settings.FROM_ADDRESS
 
     def parse_content(self, content):
+        # Escape user-provided content to prevent HTML injection
+        escaped_content = escape(content)
         return '<font face="Microsoft YaHei, Helvetica Neue, Helvetica">{}</font>'.format(
-            "<p>{}</p>".format("</p><p>".join(content.splitlines()))
+            "<p>{}</p>".format("</p><p>".join(escaped_content.splitlines()))
         )
 
     def get_html(self, body):
@@ -178,11 +184,11 @@ class EmailSender(object):
 
             table_html = sender.generate_table(heads, contents)
         """
-        thead = "".join(["<th><p>{}</p></th>\n".format(str(h)) for h in heads])
+        thead = "".join(["<th><p>{}</p></th>\n".format(escape(str(h))) for h in heads])
         tbody = ""
         for cnt in contents:
             tbody += "<tr>{}</tr>\n".format(
-                "".join(["<td><p>{}</p></td>".format(str(h)) for h in cnt])
+                "".join(["<td><p>{}</p></td>".format(escape(str(h))) for h in cnt])
             )
 
         return dedent(
