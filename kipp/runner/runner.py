@@ -20,6 +20,7 @@ Examples:
 from __future__ import unicode_literals
 
 import argparse
+import shlex
 import subprocess
 import sys
 import inspect
@@ -145,21 +146,23 @@ def catch_sys_quit_signal():
 
 def runner(command):
     process = err_msg = None
+    command_args = command if isinstance(command, (list, tuple)) else shlex.split(command)
+    command_display = " ".join(command_args)
     opt.set_option("runner_command_start_at", time.time())
     try:
         opt.set_option(
-            "runner_monitor", RunStatsMonitor(command=command, args=sys.argv[1:-1])
+            "runner_monitor", RunStatsMonitor(command=command_display, args=sys.argv[1:-1])
         )
         clean_monitor_logs()
         catch_sys_quit_signal()
         opt.runner_monitor.start()
-        get_logger().info("kipp.runner for %s", command)
+        get_logger().info("kipp.runner for %s", command_display)
         opt.set_option(
             "runner_command_start_at", time.time()
         )  # override start_at before real process starting
         process = subprocess.Popen(
-            [command],
-            shell=True,
+            command_args,
+            shell=False,
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
             preexec_fn=os.setsid,
@@ -182,7 +185,7 @@ def runner(command):
 
         raise
     else:
-        get_logger().info("successed: %s", command)
+        get_logger().info("successed: %s", command_display)
         opt.runner_monitor.success()
     finally:
         kill_process(process)
@@ -215,6 +218,7 @@ def setup_arguments():
     if not opt.command:
         raise AttributeError("You should run like ``python -m runner <COMMAND>``")
 
+    opt.set_option("command_args", list(opt.command))
     opt.set_option("command", " ".join(opt.command))
 
 
@@ -228,4 +232,4 @@ def main():
         if not fp:
             raise KippRunnerException("another process is still running")
 
-    runner(opt.command)
+    runner(opt.command_args)

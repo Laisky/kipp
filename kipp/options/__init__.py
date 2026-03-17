@@ -8,14 +8,20 @@ Configuration Manager
 
 Uniform arguments entrypoint.
 
+Provides a cascading configuration lookup that checks multiple sources
+in priority order: inner settings > CLI args > env vars > env-specific
+settings > local settings > project settings.
 """
 
-from __future__ import unicode_literals, absolute_import
-import os
+from __future__ import annotations
+
 import copy
+import importlib
+import os
+from types import ModuleType
+from typing import Any
 
 # import sys
-import importlib
 
 # from imp import load_source
 
@@ -122,37 +128,47 @@ from .exceptions import KippOptionsException
 
 
 class OptionKeyTypeConflictError(KippOptionsException):
+    """Raised when a dotted key path conflicts with an existing non-option value."""
+
     pass
 
 
-class BaseOptions(object):
-    def __init__(self, is_allow_overwrite_child_opt=True):
-        self._inner_settings = {}
+class BaseOptions:
+    """Hierarchical key-value store supporting dotted key paths.
+
+    Dotted keys like ``"a.b.c"`` are automatically expanded into nested
+    BaseOptions instances, enabling tree-structured configuration.
+    """
+
+    def __init__(self, is_allow_overwrite_child_opt: bool = True) -> None:
+        self._inner_settings: dict[str, Any] = {}
         self._is_allow_overwrite_child_opt = is_allow_overwrite_child_opt
 
-    def create_option(self):
+    def create_option(self) -> BaseOptions:
         return BaseOptions()
 
     @property
-    def is_allow_overwrite_child_opt(self):
+    def is_allow_overwrite_child_opt(self) -> bool:
         return self._is_allow_overwrite_child_opt
 
     @is_allow_overwrite_child_opt.setter
-    def is_allow_overwrite_child_opt(self, val):
+    def is_allow_overwrite_child_opt(self, val: bool) -> None:
         assert isinstance(val, bool), "must be bool"
         self._is_allow_overwrite_child_opt = val
 
-    def set_option(self, name, val):
-        """Set your own attribute's name and value
+    def set_option(self, name: str, val: Any) -> None:
+        """Set a configuration value by name.
 
-        If name contains `.`, will auto create child option
+        Dotted names (e.g. ``"db.host"``) automatically create intermediate
+        BaseOptions nodes. When ``is_allow_overwrite_child_opt`` is False,
+        existing child option nodes cannot be replaced by leaf values.
         """
         if "." not in name:
             self._inner_settings[name] = val
             return
 
         children = name.split(".")
-        opt = self
+        opt: BaseOptions = self
         for child in children[:-1]:
             if child not in opt:
                 opt.set_option(child, self.create_option())
@@ -178,16 +194,20 @@ class BaseOptions(object):
 
     __setitem__ = set_option
 
-    def del_option(self, name):
-        """Delete your own attribute by name"""
+    def del_option(self, name: str) -> None:
+        """Delete a configuration value, restoring any lower-priority fallback."""
         if name in self._inner_settings:
             del self._inner_settings[name]
 
     __delitem__ = del_option
 
-    def get_option(self, name):
-        """If you overwrite `get_option`, you need rewrite
-        `__getitem__ = __getattr__ = get_option`
+    def get_option(self, name: str) -> Any:
+        """Retrieve a value by name, supporting dotted paths for nested lookup.
+
+        Subclasses that override this must also reassign
+        ``__getitem__ = __getattr__ = get_option`` to maintain
+        consistent access semantics across ``opt.x``, ``opt['x']``,
+        and ``opt.get_option('x')``.
         """
         if "." not in name:
             if name not in self._inner_settings:
@@ -195,7 +215,7 @@ class BaseOptions(object):
             else:
                 return self._inner_settings[name]
 
-        opt = self
+        opt: BaseOptions | Any = self
         for child in name.split("."):
             if not isinstance(opt, BaseOptions) or child not in opt:
                 raise AttributeError
@@ -206,7 +226,7 @@ class BaseOptions(object):
 
     __getitem__ = __getattr__ = get_option
 
-    def __contains__(self, name):
+    def __contains__(self, name: str) -> bool:
         """Override ``in`` operator"""
         try:
             self.get_option(name)
@@ -292,17 +312,23 @@ class Options(BaseOptions, ArgparseMixin, SingletonMixin):
 
     """
 
-    def __init__(self, is_allow_overwrite_child_opt=True):
+    def __init__(self, is_allow_overwrite_child_opt: bool = True) -> None:
         super(Options, self).__init__(
             is_allow_overwrite_child_opt=is_allow_overwrite_child_opt
         )
         self.setup_env_settings()
 
-    def setup_env_settings(self):
-        self._command_args = None
-        self._environ = copy.deepcopy(os.environ)
-        self._env_settings = None
-        self._private_settings = None
+    def setup_env_settings(self) -> None:
+        """Initialize all configuration sources.
+
+        Loads settings modules at startup so the priority chain is ready
+        before the first ``get_option`` call. Missing modules are silently
+        skipped (common in dev environments without full settings layout).
+        """
+        self._command_args: Any = None
+        self._environ: os._Environ[str] = copy.deepcopy(os.environ)
+        self._env_settings: ModuleType | None = None
+        self._private_settings: ModuleType | None = None
 
         # try:  # load Utilities settings
         #     movoto_settings = self.load_utilities_settings()
@@ -324,14 +350,20 @@ class Options(BaseOptions, ArgparseMixin, SingletonMixin):
         try:  # load project settings
             from settings import settings as project_settings
         except ImportError:
-            self._project_settings = None
+            self._project_settings: ModuleType | None = None
         else:
             get_logger().info("setup settings from settings.py")
             self._project_settings = project_settings
 
         self.load_specifical_settings()  # load env from environment
 
-    def get_option(self, name):
+    def get_option(self, name: str) -> Any:
+        """Look up a configuration value through the priority chain.
+
+        The lookup order ensures that more specific/local sources always
+        win over broader defaults. This allows CLI args to override env
+        vars, which override file-based settings, etc.
+        """
         try:
             val = super(Options, self).get_option(name)
         except AttributeError:
@@ -363,7 +395,12 @@ class Options(BaseOptions, ArgparseMixin, SingletonMixin):
 
     __getitem__ = __getattr__ = get_option
 
-    def load_specifical_settings(self, env=None):
+    def load_specifical_settings(self, env: str | None = None) -> None:
+        """Load environment-specific settings module (e.g. ``settings_staging``).
+
+        Determined by the ``TARS_ENV`` environment variable unless
+        explicitly overridden via the ``env`` parameter.
+        """
         env = env or os.environ.get("TARS_ENV", None)
         if not env:
             return
@@ -377,8 +414,8 @@ class Options(BaseOptions, ArgparseMixin, SingletonMixin):
             self._env_settings = env_settings
             get_logger().info("Setup specifical settings from settings_%s", env)
 
-    def set_command_args(self, args, is_patch_utilies=True):
-        """"Setup with argparse"""
+    def set_command_args(self, args: Any, is_patch_utilies: bool = True) -> None:
+        """Register parsed argparse namespace as a configuration source."""
         self._command_args = args
         if hasattr(args, "env"):
             get_logger().warning(

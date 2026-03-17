@@ -1,20 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+from __future__ import annotations
+
+import io
+import shlex
 from threading import RLock
 import time
 import os
 import tempfile
 from functools import wraps
-from collections import namedtuple
+from collections.abc import Callable
+from typing import Any
 import re
 import subprocess
 
 try:
     import fcntl
 except ImportError:
-    fcntl = None
+    # fcntl is Unix-only; on Windows this remains None and
+    # check_is_allow_to_running will raise NotImplementedError
+    fcntl = None  # type: ignore[assignment]
 
 from .logger import setup_logger, get_logger
 from .date import UTC, CST, parse_dtstr, utcnow, cstnow
@@ -27,16 +33,26 @@ logger = get_logger()
 email_sender = EmailSender()
 
 
-def run_command(command, timeout):
-    """Run command and return stdout and strerr
+def run_command(command: str, timeout: int) -> str:
+    """Run a command and return its stdout.
+
+    On timeout the child process is killed and its partial output is still
+    captured via a second communicate() call. Raises AssertionError if the
+    command exits with a non-zero return code.
 
     Args:
-        command (str): command to run
-        timeout (int): seconds
+        command: command to run
+        timeout: seconds before the process is killed
     """
     logger.debug("run command, {}".format(command))
+    # Avoid invoking a shell for caller-provided commands; execute argv directly
+    # so shell metacharacters are treated as data instead of syntax.
     p = subprocess.Popen(
-        [command], shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        shlex.split(command),
+        shell=False,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
     try:
         outs, errs = p.communicate(timeout=timeout)
@@ -48,9 +64,11 @@ def run_command(command, timeout):
     return outs
 
 
-def timer(func):
+def timer(func: Callable[..., Any]) -> Callable[..., Any]:
+    """Decorator that logs the start and end of a function call."""
+
     @wraps(func)
-    def wrapper(*args, **kw):
+    def wrapper(*args: Any, **kw: Any) -> Any:
         logger.info("{} running...".format(func.__name__))
         try:
             return func(*args, **kw)
@@ -60,8 +78,11 @@ def timer(func):
     return wrapper
 
 
-class IOTA(object):
-    """Simple Counter
+class IOTA:
+    """Thread-safe auto-incrementing counter.
+
+    Defaults to starting at -1 so the first call returns 0, matching
+    Go's iota semantics where the first constant is zero-valued.
 
     Examples:
     ::
@@ -73,31 +94,36 @@ class IOTA(object):
         iota.latest()    # return 4
     """
 
-    def __init__(self, init=-1, step=1):
+    def __init__(self, init: int = -1, step: int = 1) -> None:
         init = int(init)
-        self.__count = init
-        self.__step = step
-        self.__lock = RLock()
+        self.__count: int = init
+        self.__step: int = step
+        self.__lock: RLock = RLock()
 
-    def count(self, step=None):
+    def count(self, step: int | None = None) -> int:
         with self.__lock:
             step = self.__step if step is None else int(step)
             self.__count += step
             return self.__count
 
-    def latest(self):
+    def latest(self) -> int:
         return self.__count
 
-    def __call__(self, step=1):
+    def __call__(self, step: int = 1) -> int:
         return self.count(step)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.__count)
 
     __repr__ = __str__
 
 
-def sleep(secs):
+def sleep(secs: float) -> None:
+    """Sleep for the given duration, resilient to spurious early wakeups.
+
+    Unlike time.sleep(), this retries in a loop to guarantee the full
+    duration elapses even if the OS wakes the thread prematurely.
+    """
     sleep_until = time.time() + secs
     remains = secs
     while remains:
@@ -105,18 +131,23 @@ def sleep(secs):
         remains = max(sleep_until - time.time(), 0)
 
 
-VALID_FNAME_REGEX = re.compile("[a-zA-Z0-9]+")
+VALID_FNAME_REGEX: re.Pattern[str] = re.compile("[a-zA-Z0-9]+")
 
 
-def generate_validate_fname(val, dirpath=tempfile.gettempdir()):
-    """Remove all invalidate characters in file path
+def generate_validate_fname(
+    val: str, dirpath: str = tempfile.gettempdir()
+) -> str:
+    """Sanitize a string into a valid lock file path.
+
+    Strips all non-alphanumeric characters, joins remaining segments
+    with underscores, and appends a .lock extension.
 
     Args:
-        val (str): file name
-        dirpath (str, default=<system tempfile directory>):
+        val: file name (potentially containing unsafe characters)
+        dirpath: directory for the generated path
 
     Returns:
-        str: absolute file path
+        Absolute file path suitable for use as a lock file
     """
     fname = "{}.lock".format("_".join(VALID_FNAME_REGEX.findall(val)))
     if dirpath:
@@ -125,17 +156,20 @@ def generate_validate_fname(val, dirpath=tempfile.gettempdir()):
     return fname
 
 
-def check_is_allow_to_running(lock_fname):
-    """Check whether is another process is still running
+def check_is_allow_to_running(lock_fname: str) -> io.TextIOWrapper | bool:
+    """Acquire an exclusive file lock to enforce single-instance execution.
+
+    Uses POSIX advisory locking (fcntl). The caller MUST keep a reference
+    to the returned file object for the lock's lifetime -- if it gets
+    garbage-collected, the lock is released.
 
     Args:
-        lock_fname (str): the lock file path
+        lock_fname: the lock file path,
             such as ``/mnt/log/ramjet-driver.lock``
 
     Returns:
-        fp/False: is allow to running for current process
-            fp: no other process is running, please keep the fp's reference
-            False: another process is running, you should better quit current process
+        The open file object if the lock was acquired (keep this reference!),
+        or False if another process already holds the lock.
 
     Examples:
     ::

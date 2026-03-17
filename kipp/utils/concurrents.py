@@ -84,8 +84,10 @@ Mixing executor task and coroutine
     run_until_complete(coroutine_demo())
 
 """
-from __future__ import unicode_literals
+from __future__ import annotations
 
+from typing import Any
+from collections.abc import Callable
 from functools import wraps
 
 from concurrent.futures import (
@@ -96,15 +98,21 @@ from concurrent.futures import (
 
 
 class KippPoolMixin:
-    def coroutine(self, func):
-        """Run a func in thread pool
+    """Mixin that adds a ``coroutine`` decorator to pool executors.
 
-        Wrap a func to a coroutine by thread pool executor
+    This lets callers turn any blocking function into an async-compatible
+    call that returns a Future, bridging sync code into the executor model.
+    """
+
+    def coroutine(self, func: Callable[..., Any]) -> Callable[..., Future[Any]]:
+        """Wrap a blocking function so each call submits it to the pool.
+
+        The decorated function returns a Future instead of blocking the caller.
         """
 
         @wraps(func)
-        def wrapper(*args, **kw):
-            return self.submit(func, *args, **kw)
+        def wrapper(*args: Any, **kw: Any) -> Future[Any]:
+            return self.submit(func, *args, **kw)  # type: ignore[attr-defined]
 
         return wrapper
 

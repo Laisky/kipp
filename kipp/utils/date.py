@@ -2,52 +2,62 @@
 # -*- coding: utf-8 -*-
 
 """
----------------
-Datatime Utilis
----------------
+-----------------
+Datetime Utilities
+-----------------
 
-Usage
-::
+Timezone-aware datetime parsing and construction.
 
-    # import timezone constants
-    from kipp.utils import UTC, CST
+All returned datetimes are timezone-aware (UTC by default) unless
+explicitly requested otherwise via ``naive=True``. This avoids the
+common pitfall of comparing naive and aware datetimes.
 
-    # import datetime functions
-    from kipp.utils import parse_dtstr, utcnow, cstnow
+Usage::
+
+    from kipp.utils import UTC, CST, parse_dtstr, utcnow, cstnow
 
 """
 
-from __future__ import unicode_literals
+from __future__ import annotations
+
 import re
 import datetime
-from future.utils import iteritems
 
 import pytz
 import maya
 
 
-UTC = pytz.timezone("utc")
-CST = pytz.timezone("Asia/Shanghai")
+UTC: pytz.BaseTzInfo = pytz.timezone("utc")
+CST: pytz.BaseTzInfo = pytz.timezone("Asia/Shanghai")
 
-_SPECIAL_DTSTR_REGEX_MAP = {
+# Maps regex patterns to strptime formats for non-standard datetime strings
+# encountered in MLS data feeds (e.g., "1300" for 13:00, "13:00 noon")
+_SPECIAL_DTSTR_REGEX_MAP: dict[re.Pattern[str], str] = {
     re.compile(r"^(\d{4})$"): "%H%M",
     re.compile(r"^(\d{2}:\d{2}) noon$", flags=re.I): "%H:%M",
 }
 
 
-def _parse_special_dtstr(dtstr):
-    """Parse MLSes weird datetime string formats"""
-    for dt_regx, dt_fmt in iteritems(_SPECIAL_DTSTR_REGEX_MAP):
+def _parse_special_dtstr(dtstr: str) -> datetime.datetime | None:
+    """Parse MLSes weird datetime string formats.
+
+    Returns None if the string doesn't match any known special format,
+    allowing the caller to fall through to the general-purpose parser.
+    """
+    for dt_regx, dt_fmt in _SPECIAL_DTSTR_REGEX_MAP.items():
         m = dt_regx.match(dtstr)
         if m:
             _dtstr = m.groups()[0]
             return UTC.localize(datetime.datetime.strptime(_dtstr, dt_fmt))
 
+    return None
 
-_IGNORE_TZ_REGEX = re.compile(r"[+\-][0-9:]{1,5}$")
+
+_IGNORE_TZ_REGEX: re.Pattern[str] = re.compile(r"[+\-][0-9:]{1,5}$")
 
 
-def _extrace_dtstr_exclude_tz(dtstr):
+def _extrace_dtstr_exclude_tz(dtstr: str) -> str:
+    """Strip trailing timezone offset (e.g., '+08:00') from a datetime string."""
     r = _IGNORE_TZ_REGEX.search(dtstr)
     if not r:
         return dtstr
@@ -56,19 +66,24 @@ def _extrace_dtstr_exclude_tz(dtstr):
 
 
 def parse_dtstr(
-    date_str, naive=False, replace_tz=None, convert_tz=None, ignore_tz=False
-):
-    """Parse datetime string to datetime object
+    date_str: str,
+    naive: bool = False,
+    replace_tz: pytz.BaseTzInfo | None = None,
+    convert_tz: pytz.BaseTzInfo | None = None,
+    ignore_tz: bool = False,
+) -> datetime.datetime:
+    """Parse datetime string to datetime object.
 
-    Default timezone is UTC.
+    Default timezone is UTC. The naive/replace_tz/convert_tz options are
+    mutually exclusive -- only the first matching branch applies.
 
     Args:
-        date_str (str): origin datetime string.
-        naive (bool, default=False): if True, return a naive datetime object.
-        replace_tz (timezone):replace to che specified timezone,
+        date_str: origin datetime string.
+        naive: if True, return a naive datetime object.
+        replace_tz: replace to the specified timezone,
             without change the literal datetime attributes.
-        convert_tz (timezone, default=UTC): convert to specified timezone.
-        ignore_tz (bool, default=False): do not parse timezone.
+        convert_tz: convert to specified timezone.
+        ignore_tz: do not parse timezone.
 
     Raises:
         ValueError: if cannot parse the date_str.
@@ -95,19 +110,30 @@ def parse_dtstr(
     return dt
 
 
-def utcnow(is_naive=False):
-    """Get current datetime with UTC timezone"""
-    dt = datetime.datetime.utcnow()
-    if not is_naive:
-        dt = UTC.localize(dt)
+def utcnow(is_naive: bool = False) -> datetime.datetime:
+    """Return the current moment in UTC.
+
+    Args:
+        is_naive: If True, strip tzinfo so the result can be compared with
+            other naive datetimes (e.g. from legacy DB columns).
+    """
+    dt = datetime.datetime.now(tz=datetime.timezone.utc)
+    # Re-localize via pytz so the tzinfo repr matches the rest of the codebase
+    dt = dt.astimezone(UTC)
+    if is_naive:
+        dt = dt.replace(tzinfo=None)
 
     return dt
 
 
-def cstnow(is_naive=False):
-    """Get current datetime with cst timezone"""
-    dt = utcnow()
-    if not is_naive:
-        dt = dt.astimezone(CST)
+def cstnow(is_naive: bool = False) -> datetime.datetime:
+    """Return the current moment in Asia/Shanghai (CST, UTC+8).
 
-    return True
+    Args:
+        is_naive: If True, strip tzinfo after conversion.
+    """
+    dt = utcnow().astimezone(CST)
+    if is_naive:
+        dt = dt.replace(tzinfo=None)
+
+    return dt

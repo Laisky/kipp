@@ -8,10 +8,16 @@ Movoto Databases
 
 """
 
-from __future__ import unicode_literals
-from collections import namedtuple
+from __future__ import annotations
 
-from past.builtins import basestring
+from collections import namedtuple
+from typing import Any
+
+# Python 2 compatibility: basestring is just str in Python 3
+try:
+    basestring  # type: ignore[used-before-def]
+except NameError:
+    basestring = str  # type: ignore[misc]
 
 from kipp.libs.aio import run_until_complete, Future
 from .base import BaseDB, as_coroutine
@@ -46,27 +52,28 @@ class RuntimeStats:
 
     """
 
-    _sql_to_create_runtime_stats = """
+    _sql_to_create_runtime_stats: str = """
         insert into runtime_stats (name, stats)
         values (%s, %s);
         """
-    _sql_to_update_runtime_stats = """
+    _sql_to_update_runtime_stats: str = """
         update runtime_stats
         set stats=%s
         where name=%s;
         """
     _RuntimeStats = namedtuple("stats", ["created_at", "updated_at", "stats"])
-    _sql_to_get_runtime_stats = """
+    _sql_to_get_runtime_stats: str = """
         select created_at, updated_at, stats
         from runtime_stats
         where name=%s;
         """
-    _sql_to_delete_runtime_stats = """
+    _sql_to_delete_runtime_stats: str = """
         delete from runtime_stats
         where name=%s;
         """
 
-    def validate_stats(self, stats):
+    def validate_stats(self, stats: str) -> None:
+        """Validate that stats is a non-empty string within the DB column limit (200 chars)."""
         try:
             assert stats, "stats should not empty"
             assert isinstance(stats, basestring), "stats should be ``str``"
@@ -74,7 +81,8 @@ class RuntimeStats:
         except AssertionError as err:
             raise DBValidateError(*err.args)
 
-    def validate_name(self, name):
+    def validate_name(self, name: str) -> None:
+        """Validate that name is a non-empty string within the DB column limit (50 chars)."""
         try:
             assert name, "name should not empty"
             assert isinstance(name, basestring), "name should be ``str``"
@@ -83,11 +91,11 @@ class RuntimeStats:
             raise DBValidateError(*err.args)
 
     @as_coroutine
-    def create_runtime_stats(self, name, stats=None):
+    def create_runtime_stats(self, name: str, stats: str | None = None) -> Any:
         """
         Args:
-            name (str): new name
-            stats (str, default=None): new stats
+            name: new name
+            stats: new stats
 
         Raises:
             DuplicateIndexError: if exists in db
@@ -100,6 +108,8 @@ class RuntimeStats:
         try:
             r = self.conn.executeBySql(self._sql_to_create_runtime_stats, name, stats)
         except self.get_mysqldb_exception("IntegrityError") as err:
+            # MySQLdb IntegrityError args[1] starts with "Duplicate entry " for
+            # unique constraint violations; re-raise other integrity errors as-is.
             if len(err.args) >= 2 and str(err.args[1]).startswith("Duplicate entry "):
                 raise DuplicateIndexError(
                     "Duplicate name in ``runtime_stats`` for {}".format(name)
@@ -110,16 +120,18 @@ class RuntimeStats:
             return r
 
     @as_coroutine
-    def update_runtime_stats(self, name, stats, upsert=False):
+    def update_runtime_stats(
+        self, name: str, stats: str, upsert: bool = False
+    ) -> Any:
         """
         Args:
-            upsert (bool, default=False): create if not exists
+            upsert: create if not exists
 
         Raises:
             DBValidateError: if name/stats invalidate
 
         Returns:
-            int: how many lines influenced
+            Number of rows affected.
         """
         self.validate_name(name)
         self.validate_stats(stats)
@@ -127,6 +139,8 @@ class RuntimeStats:
         if not int(r):  # not exists
             if upsert:  # create new stats
                 r = self.create_runtime_stats(name, stats)
+                # In async mode, create_runtime_stats returns a Future that
+                # must be resolved before we can return the result.
                 if isinstance(r, Future):
                     run_until_complete(r)
                     return r.result()
@@ -134,12 +148,13 @@ class RuntimeStats:
         return r
 
     @as_coroutine
-    def get_runtime_stats(self, name, **kwargs):
-        """Load runtime stats by name
+    def get_runtime_stats(self, name: str, **kwargs: Any) -> Any:
+        """Load runtime stats by name.
 
         Args:
-            name (str): name of the stats
-            default (optional): do not raises RecordNotFound
+            name: name of the stats
+            default: if provided, return this value instead of raising
+                RecordNotFound when the record does not exist
 
         Raises:
             RecordNotFound: if not found and no default is specified
@@ -159,7 +174,7 @@ class RuntimeStats:
         return self._RuntimeStats(*r)
 
     @as_coroutine
-    def delete_runtime_stats(self, name):
+    def delete_runtime_stats(self, name: str) -> Any:
         """
         Raises:
             DBValidateError: if name invalidate
@@ -168,16 +183,18 @@ class RuntimeStats:
         return self.conn.executeBySql(self._sql_to_delete_runtime_stats, name)
 
     @as_coroutine
-    def is_runtime_stats_exists(self, name):
-        """Check whether name exists in runtime_stats
+    def is_runtime_stats_exists(self, name: str) -> bool:
+        """Check whether name exists in runtime_stats.
 
         Raises:
             DBValidateError: if name invalidate
 
         Returns:
-            bool: is name exists
+            True if a record with the given name exists.
         """
         f = self.get_runtime_stats(name, default=None)
+        # In async mode, get_runtime_stats returns a Future; resolve it
+        # before inspecting the value.
         if isinstance(f, Future):
             run_until_complete(f)
             return f.result() is not None
@@ -186,5 +203,7 @@ class RuntimeStats:
 
 
 class MovotoDB(BaseDB, RuntimeStats, object):
+    """Facade combining the base DB connection with runtime-stats operations
+    for the ``movoto`` database."""
 
-    __db_name__ = "movoto"
+    __db_name__: str = "movoto"

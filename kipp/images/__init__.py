@@ -12,28 +12,36 @@ Notify: You should run ``pip install "kipp[image]"`` to install requirements.
 
 """
 
-from __future__ import unicode_literals
+from __future__ import annotations
+
 from io import BytesIO
+from typing import Any
 
 from PIL import Image
 
 from kipp.decorator import retry
 
 
-IMG_CONTENT_TYPE = "image/jpeg"
-THUMBNAIL_TYPES = (("p", 480), ("r", 960), ("l", 1920))
+IMG_CONTENT_TYPE: str = "image/jpeg"
+
+# Predefined thumbnail tiers: (suffix, max_width).
+# Ordered by ascending width so generate_thumbnails can stop early
+# once the source image is narrower than the current tier.
+THUMBNAIL_TYPES: tuple[tuple[str, int], ...] = (("p", 480), ("r", 960), ("l", 1920))
 
 
-def image_resize_and_compress(image_bytesIO, width, quality=75, optimize=True):
+def image_resize_and_compress(
+    image_bytesIO: BytesIO, width: int, quality: int = 75, optimize: bool = True
+) -> BytesIO:
     """Image resize and compress
 
     Relate to 'DATA-1205'.
 
     Args:
-        image_data (file handler): origin image.
-        width (int): if origin image is wider than width, resize to width.
-        quality (int, default=80): quality of destination image.
-        optimize (bool, default=True): if True, return optimized image.
+        image_bytesIO: origin image.
+        width: if origin image is wider than width, resize to width.
+        quality: quality of destination image.
+        optimize: if True, return optimized image.
     """
     pil_image = Image.open(image_bytesIO)
     if pil_image.size[0] <= width:
@@ -42,7 +50,14 @@ def image_resize_and_compress(image_bytesIO, width, quality=75, optimize=True):
     return resize_compress_image(image_bytesIO, width, quality, optimize)
 
 
-def compress_image(image_bytesIO, quality=75, optimize=True):
+def compress_image(
+    image_bytesIO: BytesIO, quality: int = 75, optimize: bool = True
+) -> BytesIO:
+    """Re-encode an image as JPEG with the given quality.
+
+    Returns whichever is smaller -- the re-encoded version or the original --
+    to avoid inflating already-well-compressed images.
+    """
     pil_image = Image.open(image_bytesIO)
     img_data = BytesIO()
     pil_image.convert("RGB").save(
@@ -55,7 +70,9 @@ def compress_image(image_bytesIO, quality=75, optimize=True):
     )
 
 
-def resize_compress_image(image_bytesIO, width, quality=75, optimize=True):
+def resize_compress_image(
+    image_bytesIO: BytesIO, width: int, quality: int = 75, optimize: bool = True
+) -> BytesIO:
     """Get the thumbnail image with input bytesIO and thumbnail width
 
     This function is deprecated, because new thumbnail image bytes may be more than original image.
@@ -64,26 +81,31 @@ def resize_compress_image(image_bytesIO, width, quality=75, optimize=True):
     (x, y) = pil_image.size
     new_size = (width, int(width * y / x))
     resized_img_bytesio = BytesIO()
-    pil_image.resize(new_size, Image.ANTIALIAS).convert("RGB").save(
+    pil_image.resize(new_size, Image.LANCZOS).convert("RGB").save(
         resized_img_bytesio, format="JPEG", quality=quality, optimize=optimize
     )
     return resized_img_bytesio
 
 
 def get_thumbnail(
-    input_image_bytesIO,
-    thumbnail_width,
-    thumbnail_height=0,
-    quality_withdraw=5,
-    quality=75,
-    optimize=True,
-):
-    """Generate the image thumbnails for one input image
+    input_image_bytesIO: BytesIO,
+    thumbnail_width: int,
+    thumbnail_height: int = 0,
+    quality_withdraw: int = 5,
+    quality: int = 75,
+    optimize: bool = True,
+) -> BytesIO:
+    """Generate a single thumbnail that is guaranteed to be no larger than the original.
+
+    Iteratively lowers JPEG quality by ``quality_withdraw`` steps until the
+    compressed thumbnail is smaller than the source.  This prevents the
+    perverse case where a small high-entropy source produces a larger thumbnail.
 
     Args:
-        input_image_bytesIO (io.BytesIO): input origin image bytesIO.
-        thumbnail_width (int): thumbnail image width needed
-        quality_withdraw (int): quality_withdraw
+        input_image_bytesIO: input origin image bytesIO.
+        thumbnail_width: thumbnail image width needed
+        thumbnail_height: explicit height; auto-computed from aspect ratio if 0
+        quality_withdraw: amount to reduce quality each iteration
         quality & optimize: see Pillow document.
     """
     input_image_bytesIO.seek(0)
@@ -93,7 +115,7 @@ def get_thumbnail(
     if not thumbnail_height:
         thumbnail_height = int(thumbnail_width * pimg.size[1] / pimg.size[0])
     thm_size = (thumbnail_width, thumbnail_height)
-    pimg = pimg.convert("RGB").resize(thm_size, Image.ANTIALIAS)
+    pimg = pimg.convert("RGB").resize(thm_size, Image.LANCZOS)
     q = quality
     while 1:
         thumbnail_data = BytesIO()
@@ -108,15 +130,20 @@ def get_thumbnail(
             return thumbnail_data
 
 
-def generate_thumbnails(image_bytesIO, img_s3_key, s3):
-    """Generate the image thumbnails for one input image,
-        and store the thumbnails in s3.
+def generate_thumbnails(image_bytesIO: BytesIO, img_s3_key: str, s3: Any) -> int:
+    """Generate all thumbnail tiers for an image and upload them to S3.
+
+    Once the source image is narrower than a tier width, the compressed-only
+    version is uploaded and all subsequent (larger) tiers are created by
+    copying that same S3 key -- avoiding redundant re-encoding.
 
     Args:
-        img_data (io.BytesIO): origin image.
-        img_s3_key (str): img_s3_key
-        s3 (Utilities.movoto.s3_handler.S3_handler): s3 connected client
+        image_bytesIO: origin image.
+        img_s3_key: S3 object key for the original image.
+        s3: S3 connected client (Utilities.movoto.s3_handler.S3_handler).
 
+    Returns:
+        A bitmask with one bit per tier, all set (e.g. 7 for 3 tiers).
     """
     pil_image = Image.open(image_bytesIO)
     key_slices = img_s3_key.split(".")
@@ -144,61 +171,23 @@ def generate_thumbnails(image_bytesIO, img_s3_key, s3):
     return flag
 
 
-# def generate_thumbnails(image_bytesIO, img_s3_key, s3):
-#     """ Generate the image thumbnails for one input image,
-#         and store the thumbnails in s3.
-#
-#     Args:
-#         img_data (io.BytesIO): origin image.
-#         img_s3_key (str): img_s3_key
-#         thumbnail_types : the thumbnails to generate, please make sure it is order by width ascend.
-#                         Examples: ((u'p', 480),
-#                                     (u'r', 960),
-#                                     (u'l', 1920))
-#
-#         s3 (Utilities.movoto.s3_handler.S3_handler): s3 connected client
-#
-#     """
-#     pil_image = Image.open(image_bytesIO)
-#     key_slices = img_s3_key.split(".")
-#     copy_key = ''
-#     thum_o = None
-#     for tname, twidth in THUMBNAIL_TYPES[::-1]:
-#         thumnail_s3_key = "{}_{}.{}".format(key_slices[0], tname, key_slices[1])
-#         if pil_image.size[0] <= twidth:
-#             if copy_key:
-#                 new_key = s3.copy_file(copy_key, thumnail_s3_key)
-#                 if not new_key:
-#                     raise Exception('Copy S3 key [%s] error!' % thumnail_s3_key)
-#                 continue
-#             else:
-#                 thm_data = compress_image(image_bytesIO) # only do compress
-#                 thum_o = thm_data
-#                 copy_key = thumnail_s3_key
-#         else:
-#             thm_data = get_thumbnail(thum_o if thum_o else image_bytesIO, twidth)
-#         thm_data.seek(0)
-#         resp = s3.m_uploadImage(thm_data, IMG_CONTENT_TYPE, thumnail_s3_key)
-#         if resp.status != 200:
-#             raise Exception('Upload S3 key [%s] error!' % thumnail_s3_key)
-#
-#     flag = 2 ** len(THUMBNAIL_TYPES) - 1
-#     return flag
+def generate_possible_thumbnails(
+    image_bytesIO: BytesIO, img_s3_key: str, s3: Any
+) -> list[dict[str, int | str]]:
+    """Generate thumbnails only for tiers narrower than the source image.
 
-
-def generate_possible_thumbnails(image_bytesIO, img_s3_key, s3):
-    """Generate the image thumbnails for one input image,
-        and store the thumbnails in s3.
+    Unlike ``generate_thumbnails``, this skips tiers where the source is
+    already smaller, so no upscaling or unnecessary copies occur.  Stops
+    at the first tier that exceeds the source width (tiers are ascending).
 
     Args:
-        img_data (io.BytesIO): origin image.
-        img_s3_key (str): img_s3_key
-        s3 (Utilities.movoto.s3_handler.S3_handler): s3 connected client
-
+        image_bytesIO: origin image.
+        img_s3_key: S3 object key for the original image.
+        s3: S3 connected client (Utilities.movoto.s3_handler.S3_handler).
     """
     pil_image = Image.open(image_bytesIO)
     key_slices = img_s3_key.split(".")
-    generated_thumbnail_list = []
+    generated_thumbnail_list: list[dict[str, int | str]] = []
     for tname, twidth in THUMBNAIL_TYPES:
         if pil_image.size[0] > twidth:
             thumnail_s3_key = "{}_{}.{}".format(key_slices[0], tname, key_slices[1])
@@ -220,11 +209,11 @@ def generate_possible_thumbnails(image_bytesIO, img_s3_key, s3):
 
 
 @retry(Exception, tries=3, delay=3, backoff=3)
-def request_s3_image(url, http_session):
+def request_s3_image(url: str, http_session: Any) -> BytesIO:
     """Request image data by http session
 
     Args:
-        url (str): request url
+        url: request url
         http_session: you can get it yourself by requests.Session() or give requests.
     """
     res = http_session.get(url)
