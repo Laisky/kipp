@@ -1,3 +1,10 @@
+## 0.3.3 (prepared 2026-10-10)
+
+- Permit xxhash 1.x through 3.x while preserving xxh32 timeout-cache keys, cache hits and expiration.
+- Retain the existing public API and dependency lower bound.
+- Add frozen cache-key regression coverage and fast compatibility CI.
+- Declare the Markdown package description and validate installed distribution metadata.
+
        
 *CURRENT*
 ---
