@@ -89,6 +89,7 @@ setup(
     author_email="ppcelery@gmail.com",
     description="Python Utils",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/Laisky/kipp",
     license="MIT License",
     entry_points="""\
