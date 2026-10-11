@@ -1,3 +1,13 @@
+## 0.4.0 (prepared 2026-10-11)
+
+- Support current Tornado 6, Pillow 12, xxhash 4 and Redis 8 alongside existing xxhash 1–3 and Redis 5 clients.
+- Encode cache-key input as UTF-8 before xxh32 hashing; frozen key values, hits and expiration are unchanged.
+- Bridge worker futures thread-safely, yield completed futures once and stop the explicitly supplied event loop.
+- Resolve conflicting aio extras and replace obsolete image/documentation dependencies.
+- Declare the actual Python 3.10+ runtime floor; retain 3.10 compatibility and recommend maintained Python releases.
+- Use isolated PEP 517 builds without importing runtime dependencies or modifying README.
+- Remove unused YAML/zipp requirements and Python 2 import hooks; declare the directly used pytz dependency.
+
 ## 0.3.3 (prepared 2026-10-10)
 
 - Permit xxhash 1.x through 3.x while preserving xxh32 timeout-cache keys, cache hits and expiration.

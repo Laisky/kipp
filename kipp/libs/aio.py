@@ -11,7 +11,9 @@ There's no need to use this module directly, you can use ``kipp.aio``
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Callable, Generator
+from concurrent.futures import Future as ConcurrentFuture
 from threading import RLock
 from datetime import timedelta
 from typing import Any
@@ -129,7 +131,13 @@ def wait(futures: list[Future] | set[Future]) -> Future:
         child futures.  Duplicates are removed via ``set()`` to avoid
         scheduling the same future twice in ``tornado.gen.multi``.
     """
-    return multi(set(futures))
+    # Worker-thread callbacks must wake the asyncio selector thread-safely.
+    # Plain concurrent Futures passed to gen.multi can complete off-loop.
+    return multi([
+        asyncio.wrap_future(future)
+        if isinstance(future, ConcurrentFuture) else future
+        for future in set(futures)
+    ])
 
 
 def as_completed(
@@ -172,21 +180,31 @@ def as_completed(
 
     def _set_evt(futu: Future) -> None:
         with _lock:
-            evt.set()
             _completed.append(futu)
+            evt.set()
+
+    def _notify(futu: Future) -> None:
+        # A concurrent Future invokes its callback on the worker thread.
+        ioloop.add_callback(_set_evt, futu)
 
     for futu in futures_set:
-        futu.add_done_callback(_set_evt)
+        if futu.done():
+            _notify(futu)
+        else:
+            futu.add_done_callback(_notify)
 
-    while not all([futu.done() for futu in futures_set]):
+    remaining = set(futures_set)
+    while remaining:
         f_evt = evt.wait(timeout=timeout)
         run_until_complete(f_evt)
         f_evt.result()
         with _lock:
-            while _completed:
-                yield _completed.pop(0)
-
+            completed = list(_completed)
+            _completed.clear()
             evt.clear()
+        for futu in completed:
+            remaining.remove(futu)
+            yield futu
 
 
 def get_event_loop() -> tornado.ioloop.IOLoop:
@@ -207,7 +225,7 @@ def run_until_complete(
     Registers a done-callback that stops the loop, then starts it. The caller
     can retrieve the result via ``future.result()`` after this returns.
     """
-    ioloop.add_future(future, _stop)
+    ioloop.add_future(future, lambda completed: ioloop.stop())
     ioloop.start()
 
 

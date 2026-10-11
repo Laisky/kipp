@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
------------------
+------------------
 Datetime Utilities
------------------
+------------------
 
 Timezone-aware datetime parsing and construction.
 
@@ -89,11 +89,9 @@ def parse_dtstr(
         ValueError: if cannot parse the date_str.
 
     Examples:
-    ::
-        from kipp.utils import parse_dtstr
-
-        dtstr = '2017/1/1 13:00 +08:00'
-        dt = parse_dtstr(dtstr)
+        >>> from kipp.utils import parse_dtstr
+        >>> dtstr = '2017/1/1 13:00 +08:00'
+        >>> dt = parse_dtstr(dtstr)
 
     """
     if ignore_tz:

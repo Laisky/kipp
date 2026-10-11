@@ -28,10 +28,7 @@ from contextlib import contextmanager
 from tornado.httpclient import AsyncHTTPClient
 from tornado.httputil import parse_cookie, url_concat
 from tornado.escape import json_encode, json_decode
-from future.standard_library import hooks
-
-with hooks():
-    from urllib.parse import urlencode
+from urllib.parse import urlencode
 
 from kipp.libs.aio import return_in_coroutine
 from kipp.utils import get_logger

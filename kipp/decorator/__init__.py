@@ -235,7 +235,7 @@ def calculate_args_hash(*args: Any, **kw: Any) -> str:
     Uses xxHash (xxh32) for speed over cryptographic strength -- this is
     only intended for cache-key derivation, not security.
     """
-    return xxhash.xxh32(str(args) + str(kw)).hexdigest()
+    return xxhash.xxh32((str(args) + str(kw)).encode("utf-8")).hexdigest()
 
 
 CacheItem = namedtuple("CacheItem", ["data", "timeout_at"])
