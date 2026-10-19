@@ -5,43 +5,17 @@ import os
 import re
 import codecs
 
-try:
-    import setuptools
-    from setuptools import setup
-except ImportError:
-    setuptools = None
-    from distutils.core import setup
-
-import kipp
-
+from setuptools import setup
 
 with open("requirements.txt") as f:
-    install_requires = f.read().strip().split("\n")
+    install_requires = [
+        line.strip() for line in f if line.strip() and not line.lstrip().startswith("#")
+    ]
 
-try:
-    import concurrent.futures
-except ImportError:
-    # py2 `concurrent.futures`
-    install_requires.extend(["futures", "tornado~=4.5"])
+# Read the constant without importing runtime dependencies or rewriting README.
+with open("kipp/__init__.py") as f:
+    version = re.search(r'__version__ = "([^"]+)"', f.read()).group(1)
 
-
-def update_readme_version(version):
-    ver_reg = re.compile(
-        "(https://img\.shields\.io/badge/version-v"
-        "[0-9]+\.[0-9]+(\.[0-9]+)?((dev|rc)[0-9]+)?"
-        "-blue\.svg)"
-    )
-    _v = "https://img.shields.io/badge/version-v{}-blue.svg".format(version)
-    with open("README.md", "r") as f:
-        src = f.read()
-
-    with open("README.md", "w") as f:
-        dest = ver_reg.sub(_v, src)
-        f.write(dest)
-
-
-version = kipp.__version__
-update_readme_version(version)
 
 with codecs.open("README.md", "r", "utf8") as f:
     long_description = f.read()
@@ -55,10 +29,10 @@ for dirname, dirnames, filenames in os.walk(name):
         packages.append(dirname.replace("/", "."))
 
 extras = {
-    "test": ["pytest", "mock"],
-    "doc": ["sphinx", "recommonmark", "sphinxcontrib-napoleon"],
-    "image": ["pillow==3.4.2"],
-    "aio": ["tornado~=4.5"],
+    "test": ["pytest>=8,<10", "mock>=5.2,<6"],
+    "doc": ["sphinx>=8.1,<10", "myst-parser>=4,<6"],
+    "image": ["pillow>=12.3,<13"],
+    "aio": ["tornado>=6.5.10,<7"],
 }
 all_extras = []
 for _, v in extras.items():
@@ -79,6 +53,7 @@ data_files = [
 setup(
     name=name,
     version=version,
+    python_requires=">=3.10",
     packages=packages,
     package_dir=package_dir,
     include_package_data=True,
@@ -89,6 +64,7 @@ setup(
     author_email="ppcelery@gmail.com",
     description="Python Utils",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/Laisky/kipp",
     license="MIT License",
     entry_points="""\
@@ -97,17 +73,17 @@ setup(
     """,
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Development Status :: 4 - Beta",
         "Topic :: Software Development :: Libraries",
         "Environment :: Web Environment",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
     ],
     keywords=["setup", "distutils", "utils"],
 )

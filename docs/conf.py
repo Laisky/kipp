@@ -23,7 +23,6 @@ import sys
 # sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath(".."))
 
-from recommonmark.parser import CommonMarkParser
 
 
 # -- General configuration ------------------------------------------------
@@ -43,7 +42,8 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
     "sphinx.ext.autodoc",
-    "sphinxcontrib.napoleon",
+    "sphinx.ext.napoleon",
+    "myst_parser",
 ]
 
 # Napoleon settings
@@ -61,15 +61,12 @@ napoleon_use_rtype = True
 napoleon_use_keyword = True
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = []
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = [".rst", ".md"]
-parsers = {
-    ".md": CommonMarkParser,
-}
+source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
 
 # The encoding of source files.
 #
@@ -99,7 +96,7 @@ release = __version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -191,7 +188,7 @@ html_theme = "classic"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+html_static_path = []
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied

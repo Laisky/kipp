@@ -8,6 +8,10 @@ Asynchronous Compatibility Module
 
 Notify: You should run ``pip install "kipp[aio]"`` to install requirements.
 
+This module re-exports the full public surface of ``kipp.libs.aio`` alongside
+higher-level helpers from ``.base``, ``.sqlhelper``, and ``.http``.  Consumers
+should import from ``kipp.aio`` rather than reaching into sub-modules directly.
+
 Examples:
 
     Write your own coroutine:
@@ -51,7 +55,7 @@ Examples:
 
 """
 
-from __future__ import unicode_literals
+from __future__ import annotations
 
 from kipp.libs.aio import (
     Future,

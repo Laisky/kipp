@@ -1,21 +1,17 @@
-.. kipp documentation master file, created by
-   sphinx-quickstart on Mon Jan 23 15:42:48 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Kipp
+====
 
-Welcome to Kipp's documentation!
-================================
+Humanistic utilities for maintained Python runtimes.
 
 .. toctree::
-   :maxdepth: 3
-   :caption: Contents:
+   :maxdepth: 2
 
-   source/kipp
+   api
+   dependency-compatibility
+   xxhash-compatibility
 
-
-
-Indices and tables
-==================
+Indices
+-------
 
 * :ref:`genindex`
 * :ref:`modindex`

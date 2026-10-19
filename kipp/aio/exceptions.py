@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+"""Re-exports exception types so that consumers can import from ``kipp.aio``
+without reaching into ``kipp.libs`` directly.  Tornado's ``TimeoutError`` is
+also surfaced here for convenience.
+"""
+
+from __future__ import annotations
 
 from tornado.gen import TimeoutError
 
