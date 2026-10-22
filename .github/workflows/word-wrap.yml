@@ -1,0 +1,71 @@
+name: Commit message dependency compatibility
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  word-wrap:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: candidate
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: original
+          ref: 9d984b5e4397a93059205165606870fa4ad89e48
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Activate pinned Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+          test "$(yarn --version)" = '1.22.22'
+      - name: Qualify original failure and candidate behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p original/tests/js
+          cp candidate/tests/js/word-wrap.test.cjs original/tests/js/
+          for role in original candidate; do
+            pushd "$role"
+            sha256sum package.json yarn.lock > "$RUNNER_TEMP/$role.sha256"
+            yarn --no-default-rc install --frozen-lockfile --ignore-scripts --non-interactive
+            if [ "$role" = original ]; then
+              set +e
+              EXPECTED_WORD_WRAP_VERSION=1.2.2 node --test --test-reporter=tap tests/js/word-wrap.test.cjs > "$RUNNER_TEMP/original.tap" 2>&1
+              result=$?
+              set -e
+              cat "$RUNNER_TEMP/original.tap"
+              test "$result" = 1
+              node - "$RUNNER_TEMP/original.tap" <<'NODE'
+          const assert = require('node:assert/strict');
+          const text = require('node:fs').readFileSync(process.argv[2], 'utf8');
+          assert.match(text, /^# tests 14$/m);
+          assert.match(text, /^# pass 13$/m);
+          assert.match(text, /^# fail 1$/m);
+          assert.match(text, /^# skipped 0$/m);
+          const failures = text.split('\n').filter(line => line.startsWith('not ok'));
+          assert.equal(failures.length, 1);
+          assert.match(failures[0], /nonbreaking-space trim regression/);
+          NODE
+            else
+              node --test tests/js/word-wrap.test.cjs
+            fi
+            sha256sum --check "$RUNNER_TEMP/$role.sha256"
+            popd
+          done
